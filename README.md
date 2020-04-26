@@ -34,7 +34,7 @@
 
 ### 特征组合检索首页介绍
 
-![组合检索首页](amaxinxidh_keyword_home.jpg)
+![组合检索首页](http://amaindexapk.easy.echosite.cn/images/help/amaxinxidh_keyword_home.jpg)
 
 点击屏幕底部的“特征组合按钮”，则弹出显示当前专题的所有特征词列表界面，再次点击该按钮，则关闭特征词组合界面。
 
@@ -44,7 +44,7 @@
 
 ### 特征组合检索实例介绍
 
-![组合检索实例](amaxinxidh_keyword_index.jpg)
+![组合检索实例](http://amaindexapk.easy.echosite.cn/images/help/amaxinxidh_keyword_index.jpg)
 
 截图特征组合检索栏中，粗体关键词为当前的选中的条件（“网站”），表示：在当前的信息专题列表中，包含“网站”特征的专题信息总共有13条记录。
 
@@ -60,7 +60,7 @@
 
 ### 字母表检索实例介绍
 
-![字母检索实例](amaxinxidh_alphabet_index.jpg)
+![字母检索实例](http://amaindexapk.easy.echosite.cn/images/help/amaxinxidh_alphabet_index.jpg)
 
 截图字母表检索模式中，只显示当前专题内包含关键词的首字母，若某个字母未包含关键词，则不显示在检索列表中。
 
@@ -74,7 +74,7 @@
 
 ### 模糊搜索实例介绍
 
-![模糊搜索实例](amaxinxidh_search_index.jpg)
+![模糊搜索实例](http://amaindexapk.easy.echosite.cn/images/help/amaxinxidh_search_index.jpg)
 
 截图模糊搜索模式中，在搜索栏内，输入字母“L”（不分大小写）稍微停顿后，立即显示首字母为“L”的特征关键词列表，如“Linux”和“留学”；输入汉字“管理”稍微停顿后，立即显示包含“管理”的特征词列表，如“情绪管理”、“时间管理”、“自我管理”。
 
@@ -85,7 +85,7 @@
 ---
 
 ### 其它功能介绍
-![其它功能](amaxinxidh_drawer.jpg)
+![其它功能](http://amaindexapk.easy.echosite.cn/images/help/amaxinxidh_drawer.jpg)
 
 沿屏幕左侧边缘向右滑动，即可打开侧栏页面，访问本应用的其它功能模块，如操作指南、主题设置等。
 
