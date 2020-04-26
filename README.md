@@ -92,4 +92,4 @@
 点击联系作者，加入信息导航微信群：提供错误信息；讨论信息导航技术的专题应用；定制信息专题等等。
 
 ### 安卓APK下载地址
-![下载地址](http://amaindexapk.easy.echosite.cn/images/help/amaxinxidh.jpg)
+![下载地址](http://amaindexapk.easy.echosite.cn/images/help/amaxinxidh.png)
