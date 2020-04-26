@@ -18,7 +18,7 @@
 
 ### 应用首页介绍
 
-![首页截图](amaxinxidh_home.jpg)
+![首页截图](http://amaindexapk.easy.echosite.cn/images/help/amaxinxidh_home.jpg)
 
 应用打开后，默认从后台读取最新信息专题列表，每页显示15条，向上滑动可以加载下一页。点击专题项，打开进入该专题的信息列表。
 
