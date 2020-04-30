@@ -142,13 +142,17 @@ Widget _buildKeywordButton(IconData iconName, KeywordState keywordState) {
   return Row(
     children: [
       buildIcon(iconName, size: 14, color: GlobalStore.themePrimaryIcon),
-      Text(
-        '${keywordState.title}',
-        maxLines: 1,
-        overflow: TextOverflow.clip,
-        style: keywordState.pressed
-            ? GlobalStore.keywordStyle.copyWith(fontWeight: FontWeight.bold)
-            : GlobalStore.keywordStyle,
+      Expanded(
+        child: SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          physics: BouncingScrollPhysics(),
+          child: Text(
+            '${keywordState.title}',
+            style: keywordState.pressed
+                ? GlobalStore.keywordStyle.copyWith(fontWeight: FontWeight.bold)
+                : GlobalStore.keywordStyle,
+          ),
+        ),
       ),
     ],
   );
