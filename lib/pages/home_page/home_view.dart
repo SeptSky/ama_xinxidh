@@ -65,6 +65,7 @@ Builder _buildFloatingButton(
 Widget _buildHistoryButton(HomeState state, Dispatch dispatch,
     ViewService viewService, BuildContext context) {
   final color = GlobalStore.themePrimaryBackground;
+  final iconQuarterTurns = state.iconQuarterTurns;
   return NavFloatingButton(
     iconName: Icons.history,
     color: color,
@@ -75,11 +76,11 @@ Widget _buildHistoryButton(HomeState state, Dispatch dispatch,
       if (GlobalStore.sourceType != SourceType.history) {
         viewService.broadcast(InfoNavPageActionCreator.onShowHistory());
       } else {
-        _toggleKeywordSheet(context, state.iconQuarterTurns, dispatch);
+        _toggleKeywordSheet(context, iconQuarterTurns, dispatch);
       }
-      if (state.iconQuarterTurns == 2) {
-        viewService.broadcast(KeywordNavPageActionCreator.onRefreshPage());
-      }
+      // if (state.iconQuarterTurns == 2) {
+      //   viewService.broadcast(KeywordNavPageActionCreator.onRefreshPage());
+      // }
     },
   );
 }
@@ -87,6 +88,7 @@ Widget _buildHistoryButton(HomeState state, Dispatch dispatch,
 Widget _buildFavoriteButton(HomeState state, Dispatch dispatch,
     ViewService viewService, BuildContext context) {
   final color = GlobalStore.themePrimaryBackground;
+  final iconQuarterTurns = state.iconQuarterTurns;
   return NavFloatingButton(
     iconName: Icons.star,
     color: color,
@@ -97,11 +99,11 @@ Widget _buildFavoriteButton(HomeState state, Dispatch dispatch,
       if (GlobalStore.sourceType != SourceType.favorite) {
         viewService.broadcast(InfoNavPageActionCreator.onShowFavorite());
       } else {
-        _toggleKeywordSheet(context, state.iconQuarterTurns, dispatch);
+        _toggleKeywordSheet(context, iconQuarterTurns, dispatch);
       }
-      if (state.iconQuarterTurns == 2) {
-        viewService.broadcast(KeywordNavPageActionCreator.onRefreshPage());
-      }
+      // if (state.iconQuarterTurns == 2) {
+      //   viewService.broadcast(KeywordNavPageActionCreator.onRefreshPage());
+      // }
     },
   );
 }
@@ -109,21 +111,22 @@ Widget _buildFavoriteButton(HomeState state, Dispatch dispatch,
 Widget _buildKeywordButton(HomeState state, Dispatch dispatch,
     ViewService viewService, BuildContext context) {
   final color = GlobalStore.themePrimaryBackground;
+  final iconQuarterTurns = state.iconQuarterTurns;
   return NavFloatingButton(
     title: LinuxLocalizations.of(context).characterIndex,
     iconName: Icons.navigation,
-    iconQuarterTurns: state.iconQuarterTurns,
+    iconQuarterTurns: iconQuarterTurns,
     color: color,
     isActive: GlobalStore.sourceType == SourceType.normal,
     onTap: () {
       if (GlobalStore.sourceType != SourceType.normal) {
         viewService.broadcast(InfoNavPageActionCreator.onShowNormal());
       } else {
-        _toggleKeywordSheet(context, state.iconQuarterTurns, dispatch);
+        _toggleKeywordSheet(context, iconQuarterTurns, dispatch);
       }
-      if (state.iconQuarterTurns == 2) {
-        viewService.broadcast(KeywordNavPageActionCreator.onRefreshPage());
-      }
+      // if (state.iconQuarterTurns == 2) {
+      //   viewService.broadcast(KeywordNavPageActionCreator.onRefreshPage());
+      // }
     },
     onLongTap: () {
       dispatch(HomeActionCreator.onOpenDrawer(context));

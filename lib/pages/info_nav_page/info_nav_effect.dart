@@ -234,6 +234,9 @@ Future _onToggleKeywordNav(Action action, Context<InfoNavPageState> ctx) async {
   if (ctx.state.isLoading || GlobalStore.contentType == ContentType.keyword)
     return;
   await _getFirstPageInfoEntities(action, ctx, forceUpdate: true);
+  if (isKeywordNav) {
+    ctx.broadcast(KeywordNavPageActionCreator.onRefreshPage());
+  }
 }
 
 Future _onAddInfoEntity(Action action, Context<InfoNavPageState> ctx) async {
@@ -359,6 +362,7 @@ Future _onShowNormal(Action action, Context<InfoNavPageState> ctx) async {
   GlobalStore.store
       .dispatch(GlobalReducerCreator.setSourceTypeReducer(SourceType.normal));
   await _getFirstPageInfoEntities(action, ctx, forceUpdate: true);
+  ctx.broadcast(KeywordNavPageActionCreator.onRefreshPage());
 }
 
 Future _onShowHistory(Action action, Context<InfoNavPageState> ctx) async {
@@ -372,6 +376,7 @@ Future _onShowHistory(Action action, Context<InfoNavPageState> ctx) async {
   if (_isLoadingSuccess(infoEntities)) {
     ctx.dispatch(InfoNavPageReducerCreator.initEntitiesReducer(infoEntities));
   }
+  ctx.broadcast(KeywordNavPageActionCreator.onRefreshPage());
 }
 
 Future _onShowFavorite(Action action, Context<InfoNavPageState> ctx) async {
@@ -385,6 +390,7 @@ Future _onShowFavorite(Action action, Context<InfoNavPageState> ctx) async {
   if (_isLoadingSuccess(infoEntities)) {
     ctx.dispatch(InfoNavPageReducerCreator.initEntitiesReducer(infoEntities));
   }
+  ctx.broadcast(KeywordNavPageActionCreator.onRefreshPage());
 }
 
 Future _onFavoriteInfoEntity(

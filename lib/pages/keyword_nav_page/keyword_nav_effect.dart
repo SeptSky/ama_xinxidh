@@ -1,9 +1,9 @@
 import 'dart:convert';
 
-import 'package:amainfoindex/common/consts/enum_types.dart';
 import 'package:fish_redux/fish_redux.dart';
 
 import '../../common/consts/constants.dart';
+import '../../common/consts/enum_types.dart';
 import '../../common/consts/keys.dart';
 import '../../common/consts/param_names.dart';
 import '../../common/data_access/app_def.dart';
@@ -62,20 +62,21 @@ Future _init(Action action, Context<KeywordNavPageState> ctx) async {
   /// 不使用Future.Delayed方法将会抛出异常，通过Delayed可以跳过首次执行顺序
   Future.delayed(Duration.zero, () async {
     if (_isLoading(ctx.state)) return;
-    var keywordNavEnv = await _readKeywordNavEnv(ctx);
-    if (keywordNavEnv == null) {
-      _onGetFirstPageFilters(action, ctx);
-    } else {
-      ctx.dispatch(
-          KeywordNavPageReducerCreator.resotreStateReducer(keywordNavEnv));
-      // 恢复后重新刷新特征组合条件：只有1列时，交给关联关键词页面刷新信息列表
-      if (ctx.state.keywordMode &&
-          ctx.state.getGridColCount() == Constants.maxColCount) {
-        final filterKeywords = ctx.state.getPressedPropertyFilterText();
-        ctx.broadcast(
-            InfoNavPageActionCreator.onSetFilteredKeyword(filterKeywords));
-      }
-    }
+    _onRefreshPage(action, ctx);
+    // var keywordNavEnv = await _readKeywordNavEnv(ctx);
+    // if (keywordNavEnv == null) {
+    //   _onGetFirstPageFilters(action, ctx);
+    // } else {
+    //   ctx.dispatch(
+    //       KeywordNavPageReducerCreator.resotreStateReducer(keywordNavEnv));
+    //   // 恢复后重新刷新特征组合条件：只有1列时，交给关联关键词页面刷新信息列表
+    //   if (ctx.state.keywordMode &&
+    //       ctx.state.getGridColCount() == Constants.maxColCount) {
+    //     final filterKeywords = ctx.state.getPressedPropertyFilterText();
+    //     ctx.broadcast(
+    //         InfoNavPageActionCreator.onSetFilteredKeyword(filterKeywords));
+    //   }
+    // }
   });
 }
 
@@ -93,12 +94,15 @@ Future _dispose(Action action, Context<KeywordNavPageState> ctx) async {
 Future _onRefreshPage(Action action, Context<KeywordNavPageState> ctx) async {
   GlobalStore.store.dispatch(GlobalReducerCreator.setErrorStatusReducer(false));
   ctx.dispatch(KeywordReducerCreator.resetFilterReducer());
+  var keywordMode = ctx.state.keywordMode;
   final keywordNavEnv = await _readKeywordNavEnv(ctx);
   if (keywordNavEnv != null) {
     ctx.dispatch(
         KeywordNavPageReducerCreator.resotreStateReducer(keywordNavEnv));
+    keywordMode = keywordNavEnv.keywordMode;
   }
-  if (ctx.state.keywordMode) {
+  // 使用同步状态，不要使用异步状态
+  if (keywordMode) {
     _onShowFilters(action, ctx);
   } else {
     _onShowPyCodes(action, ctx);
@@ -279,6 +283,8 @@ Future _onShowFilters(Action action, Context<KeywordNavPageState> ctx) async {
   if (GlobalStore.hasError) return;
   if (_isLoading(ctx.state)) return;
   await _onGetFirstPageFilters(action, ctx, forceUpdate: true);
+  // 确保保存最新的keywordMode状态
+  _saveKeywordNavEnv(ctx.state);
 }
 
 Future _onShowPyCodes(Action action, Context<KeywordNavPageState> ctx) async {
@@ -299,6 +305,8 @@ Future _onShowPyCodes(Action action, Context<KeywordNavPageState> ctx) async {
         final topicKeyword = GlobalStore.currentTopicDef.topicKeyword;
         keywords = await _getAlphabetFilters(topicKeyword);
     }
+    // 确保保存最新的keywordMode状态
+    _saveKeywordNavEnv(ctx.state);
     if (_isLoadingSuccess(keywords)) {
       ctx.dispatch(KeywordNavPageReducerCreator.initKeywordsReducer(keywords));
       _resetScrollController(ctx);
@@ -402,8 +410,9 @@ void _clearOtherFiltersStatus(
 
 Future<KeywordNavEnv> _readKeywordNavEnv(
     Context<KeywordNavPageState> ctx) async {
+  final sourceType = GlobalStore.sourceType.toString();
   final jsonString =
-      await SharedUtil.instance.getString(Keys.currentKeywordNav);
+      await SharedUtil.instance.getString(Keys.currentKeywordNav + sourceType);
   if (jsonString == null) return null;
   return KeywordNavEnv.fromJson(jsonDecode(jsonString));
 }
@@ -411,10 +420,11 @@ Future<KeywordNavEnv> _readKeywordNavEnv(
 /// 保存关键词导航状态数据
 Future _saveKeywordNavEnv(KeywordNavPageState state) async {
   if (Tools.hasNotElements(state.filters)) return;
+  final sourceType = GlobalStore.sourceType.toString();
   final keywordNavEnv = KeywordNavEnv(state.keywordMode, state.hasMoreFilters,
       state.nextPageNo, state.filters, '');
-  await SharedUtil.instance
-      .saveString(Keys.currentKeywordNav, jsonEncode(keywordNavEnv.toJson()));
+  await SharedUtil.instance.saveString(
+      Keys.currentKeywordNav + sourceType, jsonEncode(keywordNavEnv.toJson()));
 }
 
 Future<List<Keyword>> _getFilters(
@@ -425,7 +435,8 @@ Future<List<Keyword>> _getFilters(
   final condition = pressedFilterText == null ? '' : ",$pressedFilterText";
   final topic = GlobalStore.currentTopicDef;
   try {
-    final currKeyName = _buildFilterKeyName(topic.topicName, pageNo, condition);
+    final currKeyName = _buildFilterKeyName(
+        topic.topicName, pageNo, condition, pageState.keywordMode);
     var filters = await _loadTopicFiltersPage(currKeyName);
     if (filters != null) return filters;
     filters = await InfoNavServices.getKeywordProperties(
@@ -453,8 +464,8 @@ Future<List<Keyword>> _getFiltersFavorite(
   final condition = pressedFilterText == null ? '' : ",$pressedFilterText";
   final userName = GlobalStore.userInfo.userName;
   try {
-    final currKeyName = _buildFilterKeyName(
-        Constants.favoriteEntity + userName, pageNo, condition);
+    final currKeyName = _buildFilterKeyName(Constants.favoriteEntity + userName,
+        pageNo, condition, pageState.keywordMode);
     var filters = await _loadTopicFiltersPage(currKeyName);
     if (filters != null) return filters;
     filters = await InfoNavServices.getKeywordPropertiesFavorite(
@@ -480,8 +491,8 @@ Future<List<Keyword>> _getFiltersHistory(
   final condition = pressedFilterText == null ? '' : ",$pressedFilterText";
   final userName = GlobalStore.userInfo.userName;
   try {
-    final currKeyName = _buildFilterKeyName(
-        Constants.historyEntity + userName, pageNo, condition);
+    final currKeyName = _buildFilterKeyName(Constants.historyEntity + userName,
+        pageNo, condition, pageState.keywordMode);
     var filters = await _loadTopicFiltersPage(currKeyName);
     if (filters != null) return filters;
     filters = await InfoNavServices.getKeywordPropertiesHistory(
@@ -605,8 +616,9 @@ Future _saveTopicFiltersPage(String currKeyName, List<Keyword> filters) async {
   }
 }
 
-String _buildFilterKeyName(String topicName, int pageNo, String condition) {
-  return '${topicName}_filter_${pageNo}_$condition';
+String _buildFilterKeyName(
+    String topicName, int pageNo, String condition, bool keywordMode) {
+  return '${topicName}_filter_${pageNo}_${condition}_$keywordMode';
 }
 
 String _buildSubFilterKeyName(String topicName, String parentFilter) {

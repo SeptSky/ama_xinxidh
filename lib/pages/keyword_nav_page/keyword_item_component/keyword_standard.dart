@@ -1,3 +1,4 @@
+import 'package:amainfoindex/common/utilities/dialogs.dart';
 import 'package:fish_redux/fish_redux.dart';
 import 'package:flutter/material.dart';
 
@@ -56,12 +57,14 @@ Container buildKeywordTitle(
 
 Widget _buildKeywordTitle(IconData iconName, KeywordState keywordState,
     Dispatch dispatch, ViewService viewService) {
+  final bgColor = GlobalStore.themePrimaryIcon;
   return Expanded(
-    child: InkWell(
-        child: _buildKeywordButton(iconName, keywordState),
-        onTap:
-            _buildKeywordTitleTapAction(keywordState, dispatch, viewService)),
-  );
+      child: InkWell(
+          child: _buildKeywordButton(iconName, keywordState),
+          onTap:
+              _buildKeywordTitleTapAction(keywordState, dispatch, viewService),
+          onLongPress: () =>
+              Dialogs.showInfoToast(keywordState.title, bgColor)));
 }
 
 Function _buildKeywordTitleTapAction(
@@ -93,6 +96,7 @@ Widget _buildKeywordActionIcon(KeywordState keywordState, Dispatch dispatch,
 
 void _onAlphabetPressed(
     KeywordState keywordState, Dispatch dispatch, ViewService viewService) {
+  dispatch(KeywordReducerCreator.pressFilterReducer(keywordState.index));
   viewService
       .broadcast(InfoNavPageActionCreator.onSearchMatching(keywordState.title));
 }

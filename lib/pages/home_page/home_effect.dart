@@ -14,6 +14,7 @@ import '../../global_store/global_action.dart';
 import '../../global_store/global_store.dart';
 import '../info_nav_page/entity_list_adapter/entity_list_action.dart';
 import '../info_nav_page/info_nav_action.dart';
+import '../keyword_nav_page/keyword_nav_action.dart';
 import '../route.dart';
 import 'home_action.dart';
 import 'home_state.dart';
@@ -117,6 +118,9 @@ void _onToggleKeywordSheet(Action action, Context<HomeState> ctx) {
   }
   var newIconQuarterTurns = iconQuarterTurns == 0 ? 2 : 0;
   ctx.dispatch(HomeReducerCreator.toggleIconReducer(newIconQuarterTurns));
+  if (newIconQuarterTurns == 2) {
+    ctx.broadcast(KeywordNavPageActionCreator.onRefreshPage());
+  }
 }
 
 void _onCloseKeywordSheet(Action action, Context<HomeState> ctx) {

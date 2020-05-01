@@ -122,6 +122,27 @@ Container _buildFilterBottomBar(
   );
 }
 
+Container _buildFilterActionBar(
+    KeywordNavPageState state, Dispatch dispatch, ViewService viewService) {
+  var pressedFilterCount = state.getPressedPropertyFilterCount();
+  return Container(
+    height: 40,
+    color: GlobalStore.themePrimaryBackground,
+    child: Row(
+      children: [
+        const SizedBox(width: 10),
+        _buildResetButton(dispatch, viewService),
+        const SizedBox(width: 10),
+        _buildFilterButtonRow(pressedFilterCount, state, dispatch, viewService),
+        _buildHintInfoMarquee(pressedFilterCount, state.keywordMode),
+        const SizedBox(width: 10),
+        _buildTopicMenuButton(state, dispatch, viewService),
+        const SizedBox(width: 10),
+      ],
+    ),
+  );
+}
+
 Widget _buildFilterButtonRow(int pressedFilterCount, KeywordNavPageState state,
     Dispatch dispatch, ViewService viewService) {
   if (pressedFilterCount >= 2) {
