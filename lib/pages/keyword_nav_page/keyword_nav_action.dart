@@ -1,3 +1,4 @@
+import 'package:amainfoindex/pages/keyword_nav_page/keyword_item_component/keyword_state.dart';
 import 'package:fish_redux/fish_redux.dart';
 
 import '../../models/keywords/keyword.dart';
@@ -7,6 +8,7 @@ enum KeywordNavPageActionEnum {
   onRefreshPage,
   onGetNextPageFilters,
   onPressFilterAction,
+  onPressAlphabetAction,
   onUnpressParentAction,
   onCancelFilterAction,
   onCombineFilterAction,
@@ -25,6 +27,11 @@ class KeywordNavPageActionCreator {
   static Action onPressFilterAction(String filteredKeyword) {
     return Action(KeywordNavPageActionEnum.onPressFilterAction,
         payload: filteredKeyword);
+  }
+
+  static Action onPressAlphabetAction(KeywordState keywordState) {
+    return Action(KeywordNavPageActionEnum.onPressAlphabetAction,
+        payload: keywordState);
   }
 
   static Action onUnpressParentAction() {

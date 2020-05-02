@@ -32,6 +32,7 @@ Effect<KeywordNavPageState> buildEffect() {
     KeywordNavPageActionEnum.onRefreshPage: _onRefreshPage,
     KeywordNavPageActionEnum.onGetNextPageFilters: _onGetNextPageFilters,
     KeywordNavPageActionEnum.onPressFilterAction: _onPressFilterAction,
+    KeywordNavPageActionEnum.onPressAlphabetAction: _onPressAlphabetAction,
     KeywordNavPageActionEnum.onUnpressParentAction: _onUnpressParentAction,
     KeywordNavPageActionEnum.onCancelFilterAction: _onCancelFilterAction,
     KeywordNavPageActionEnum.onCombineFilterAction: _onCombineFilterAction,
@@ -188,6 +189,13 @@ Future _onPressFilterAction(
   var processed = false;
   processed = _pressPropertyFilter(processed, isProperty, action, ctx);
   processed = await _pressParentFilter(processed, isProperty, action, ctx);
+}
+
+Future _onPressAlphabetAction(
+    Action action, Context<KeywordNavPageState> ctx) async {
+  final keywordState = action.payload;
+  _clearAlphabetsStatus(ctx.state);
+  ctx.dispatch(KeywordReducerCreator.pressFilterReducer(keywordState.index));
 }
 
 Future _onUnpressParentAction(
@@ -393,6 +401,17 @@ void _resetIndex(List<Keyword> keywords) {
   if (Tools.hasNotElements(keywords)) return;
   for (var i = 0; i < keywords.length; i++) {
     keywords[i].index = i;
+  }
+}
+
+void _clearAlphabetsStatus(KeywordNavPageState state) {
+  var pressedAlphabets = state.getPressedAlphabetList();
+  if (pressedAlphabets != null) {
+    for (var i = 0; i < pressedAlphabets.length; i++) {
+      if (pressedAlphabets[i].pressed) {
+        pressedAlphabets[i].pressed = false;
+      }
+    }
   }
 }
 

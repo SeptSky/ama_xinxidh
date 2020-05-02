@@ -70,7 +70,7 @@ class KeywordNavPageState extends MutableSource
       ..index = filter.index
       ..title = filter.title
       ..isProperty = filter.isProperty
-      ..pressed = filter.pressed
+      ..pressed = filter.pressed ?? false
       ..userInfo = userInfo
       ..appConfig = appConfig
       ..currentTheme = currentTheme;
@@ -87,6 +87,15 @@ class KeywordNavPageState extends MutableSource
   void setItemData(int index, Object data) {
     KeywordState keywordState = data;
     filters[index].pressed = keywordState.pressed;
+  }
+
+  List<Keyword> getPressedAlphabetList() {
+    if (Tools.hasNotElements(filters)) return null;
+    var pressedAlphabets = filters
+        .where((filter) => filter.pressed && filter.isProperty == null)
+        .toList();
+    if (Tools.hasNotElements(pressedAlphabets)) return null;
+    return pressedAlphabets;
   }
 
   List<Keyword> getPressedPropertyFilterList() {

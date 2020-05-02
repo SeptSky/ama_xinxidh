@@ -96,7 +96,7 @@ Widget _buildKeywordActionIcon(KeywordState keywordState, Dispatch dispatch,
 
 void _onAlphabetPressed(
     KeywordState keywordState, Dispatch dispatch, ViewService viewService) {
-  dispatch(KeywordReducerCreator.pressFilterReducer(keywordState.index));
+  dispatch(KeywordNavPageActionCreator.onPressAlphabetAction(keywordState));
   viewService
       .broadcast(InfoNavPageActionCreator.onSearchMatching(keywordState.title));
 }
