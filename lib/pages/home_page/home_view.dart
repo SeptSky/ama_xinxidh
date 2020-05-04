@@ -8,7 +8,6 @@ import '../../common/consts/param_names.dart';
 import '../../common/i10n/localization_intl.dart';
 import '../../global_store/global_store.dart';
 import '../info_nav_page/info_nav_action.dart';
-import '../keyword_nav_page/keyword_nav_action.dart';
 import '../route.dart';
 import '../widgets/nav_floating_button.dart';
 import '../widgets/smart_drawer.dart';
