@@ -65,6 +65,7 @@ const GetHistoryTagsPyCodes_Method = 'GetHistoryTagsPyCodes';
 
 const AddInfoEntityTags_Method = 'AddInfoEntityTags';
 const DeleteInfoEntityTagByName_Method = 'DeleteInfoEntityTagByName';
+const DeleteTagFromTopic_Method = 'DeleteTagFromTopic';
 const SaveKeywordRelationInfo_Method = 'SaveKeywordRelationInfo';
 const SaveUserConnectionInfo_Method = 'SaveUserConnectionInfo';
 const IncFilterRankValue_Method = 'IncFilterRankValue';

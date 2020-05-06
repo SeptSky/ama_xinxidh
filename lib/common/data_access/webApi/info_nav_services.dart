@@ -820,6 +820,17 @@ class InfoNavServices {
     return await _invokeInfoIndexApi(argObj, false);
   }
 
+  static Future<String> delTagFromTopic(
+      String userName, String topicKeyword, String tagName) async {
+    tagName = DataFormat.formatArgument(tagName);
+    final argObj = {
+      "ArgJsonText": "string=$userName;string=$topicKeyword;string=$tagName;",
+      "ServiceGuid": "$InfoNavigation_Service",
+      "MethodName": "$DeleteTagFromTopic_Method",
+    };
+    return await _invokeInfoIndexApi(argObj, false);
+  }
+
   static Future<String> saveKeywordInfo(int keywordId, String newKeywordName,
       int relationId, String relatedKeywordIds) async {
     newKeywordName = DataFormat.formatArgument(newKeywordName);

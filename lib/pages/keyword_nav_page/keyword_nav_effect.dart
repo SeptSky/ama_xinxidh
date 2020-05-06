@@ -271,7 +271,7 @@ Future _onChangeTopicDef(
       GlobalStore.store
           .dispatch(GlobalReducerCreator.changeTopicDefReducer(topicDef));
       await _onResetFilterAction(action, ctx);
-      await SharedUtil.instance.removeString(Keys.currentKeywordNav);
+      await SharedUtil.instance.removeString(_buildKeywordNavKeyName());
     }
   } catch (err) {
     GlobalStore.store
@@ -429,10 +429,8 @@ void _clearOtherFiltersStatus(
 
 Future<KeywordNavEnv> _readKeywordNavEnv(
     Context<KeywordNavPageState> ctx) async {
-  final sourceType = GlobalStore.sourceType.toString();
-  final topicName = GlobalStore.currentTopicDef.topicName;
-  final jsonString = await SharedUtil.instance
-      .getString(Keys.currentKeywordNav + sourceType + topicName);
+  final jsonString =
+      await SharedUtil.instance.getString(_buildKeywordNavKeyName());
   if (jsonString == null) return null;
   return KeywordNavEnv.fromJson(jsonDecode(jsonString));
 }
@@ -440,13 +438,10 @@ Future<KeywordNavEnv> _readKeywordNavEnv(
 /// 保存关键词导航状态数据
 Future _saveKeywordNavEnv(KeywordNavPageState state) async {
   if (Tools.hasNotElements(state.filters)) return;
-  final sourceType = GlobalStore.sourceType.toString();
-  final topicName = GlobalStore.currentTopicDef.topicName;
   final keywordNavEnv = KeywordNavEnv(state.keywordMode, state.hasMoreFilters,
       state.nextPageNo, state.filters, '');
   await SharedUtil.instance.saveString(
-      Keys.currentKeywordNav + sourceType + topicName,
-      jsonEncode(keywordNavEnv.toJson()));
+      _buildKeywordNavKeyName(), jsonEncode(keywordNavEnv.toJson()));
 }
 
 Future<List<Keyword>> _getFilters(
@@ -649,6 +644,12 @@ String _buildSubFilterKeyName(String topicName, String parentFilter) {
 
 String _buildAlphabetKeyName(String topicKeyword) {
   return '${topicKeyword}_alphabet';
+}
+
+String _buildKeywordNavKeyName() {
+  final sourceType = GlobalStore.sourceType.toString();
+  final topicName = GlobalStore.currentTopicDef.topicName;
+  return Keys.currentKeywordNav + sourceType + topicName;
 }
 
 bool _isLoading(KeywordNavPageState state) {

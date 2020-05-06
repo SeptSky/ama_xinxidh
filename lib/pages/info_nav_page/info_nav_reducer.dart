@@ -25,6 +25,7 @@ Reducer<InfoNavPageState> buildReducer() {
       InfoNavPageReducerEnum.setJumpCompletedFlagReducer:
           _setJumpCompletedFlagReducer,
       InfoNavPageReducerEnum.setAutoSearchReducer: _setAutoSearchReducer,
+      InfoNavPageReducerEnum.setTopicEmptyReducer: _setTopicEmptyReducer,
       InfoNavPageReducerEnum.setIsKeywordNavReducer: _setIsKeywordNavReducer,
     },
   );
@@ -60,6 +61,7 @@ InfoNavPageState _setPrevPageEntitiesReducer(
     infoEntities.addAll(newState.infoEntities);
     newState.infoEntities = infoEntities;
     newState.hasMoreEntities = infoEntities.length % Constants.pageSize == 0;
+    newState.topicEmpty = false;
     _resetInfoEntityIndex(newState.infoEntities);
   } else {
     newState.hasMoreEntities = false;
@@ -142,6 +144,13 @@ InfoNavPageState _setAutoSearchReducer(InfoNavPageState state, Action action) {
   final autoSearch = action.payload;
   if (autoSearch == state.autoSearch) return state;
   final newState = state.clone()..autoSearch = autoSearch;
+  return newState;
+}
+
+InfoNavPageState _setTopicEmptyReducer(InfoNavPageState state, Action action) {
+  final topicEmpty = action.payload;
+  if (topicEmpty == state.topicEmpty) return state;
+  final newState = state.clone()..topicEmpty = topicEmpty;
   return newState;
 }
 

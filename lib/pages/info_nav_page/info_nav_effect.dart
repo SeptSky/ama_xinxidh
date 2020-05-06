@@ -43,6 +43,7 @@ Effect<InfoNavPageState> buildEffect() {
     InfoNavPageActionEnum.onDelInfoEntity: _onDelInfoEntity,
     InfoNavPageActionEnum.onAddInfoEntityTags: _onAddInfoEntityTags,
     InfoNavPageActionEnum.onDelInfoEntityTag: _onDelInfoEntityTag,
+    InfoNavPageActionEnum.onDelTagFromTopic: _onDelTagFromTopic,
     InfoNavPageActionEnum.onSharePageUrl: _onSharePageUrl,
     InfoNavPageActionEnum.onClearCache: _onClearCache,
     InfoNavPageActionEnum.onShowNormal: _onShowNormal,
@@ -129,21 +130,28 @@ Future _onChangeTopicDef(Action action, Context<InfoNavPageState> ctx) async {
   final int topicId = action.payload;
   try {
     ctx.state.textController.clear();
+    if (ctx.state.topicEmpty) {
+      ctx.dispatch(InfoNavPageReducerCreator.setTopicEmptyReducer(false));
+    }
     if (GlobalStore.sourceType != SourceType.normal) {
       _changeSourceContentType(SourceType.normal, ContentType.infoEntity, ctx);
     }
     if (ctx.state.filterKeywords != null) {
       ctx.dispatch(InfoNavPageReducerCreator.setFilteredKeywordReducer(null));
     }
-    await SharedUtil.instance.removeString(Keys.currentKeywordNav);
+    await SharedUtil.instance.removeString(_buildKeywordNavKeyName());
     final topicDef = await InfoNavServices.getAppTopicFromWebApi(
         Xinxidh_App_Guid, topicId, true);
     if (topicDef != null) {
       GlobalStore.store
           .dispatch(GlobalReducerCreator.changeTopicDefReducer(topicDef));
-      await _getFirstPageInfoEntities(action, ctx, forceUpdate: true);
-      ctx.broadcast(KeywordNavPageActionCreator.onRefreshPage());
-      _jumpToListTop(ctx.state);
+      await _showInfoEntitiesBySourceType(ctx, action);
+      if (ctx.state.infoEntities.isNotEmpty) {
+        ctx.broadcast(KeywordNavPageActionCreator.onRefreshPage());
+        _jumpToListTop(ctx.state);
+      } else {
+        ctx.dispatch(InfoNavPageReducerCreator.setTopicEmptyReducer(true));
+      }
     }
   } catch (err) {
     GlobalStore.store
@@ -230,10 +238,11 @@ Future _onTagPressed(Action action, Context<InfoNavPageState> ctx) async {
 
 Future _onToggleKeywordNav(Action action, Context<InfoNavPageState> ctx) async {
   final bool isKeywordNav = action.payload;
+  if (ctx.state.isLoading ||
+      isKeywordNav == ctx.state.isKeywordNav ||
+      GlobalStore.contentType == ContentType.keyword) return;
   ctx.dispatch(InfoNavPageReducerCreator.setIsKeywordNavReducer(isKeywordNav));
-  if (ctx.state.isLoading || GlobalStore.contentType == ContentType.keyword)
-    return;
-  await _getFirstPageInfoEntities(action, ctx, forceUpdate: true);
+  await _showInfoEntitiesBySourceType(ctx, action);
   if (isKeywordNav) {
     ctx.broadcast(KeywordNavPageActionCreator.onRefreshPage());
   }
@@ -341,6 +350,20 @@ Future _onDelInfoEntityTag(Action action, Context<InfoNavPageState> ctx) async {
   }
 }
 
+Future _onDelTagFromTopic(Action action, Context<InfoNavPageState> ctx) async {
+  if (GlobalStore.hasError) return;
+  try {
+    final userName = GlobalStore.userInfo.userName;
+    final topicName = GlobalStore.currentTopicDef.topicName;
+    final tagName = action.payload;
+    await InfoNavServices.delTagFromTopic(userName, topicName, tagName);
+    _delTagFromTopic(ctx, tagName);
+  } catch (err) {
+    GlobalStore.store
+        .dispatch(GlobalReducerCreator.setErrorStatusReducer(true));
+  }
+}
+
 Future _onSharePageUrl(Action action, Context<InfoNavPageState> ctx) async {
   final EntityState entityState = action.payload;
   shareToWeChat(
@@ -359,6 +382,9 @@ Future _onClearCache(Action action, Context<InfoNavPageState> ctx) async {
 Future _onShowNormal(Action action, Context<InfoNavPageState> ctx) async {
   if (_isLoading(ctx.state)) return;
   ctx.state.textController.clear();
+  if (ctx.state.topicEmpty) {
+    ctx.dispatch(InfoNavPageReducerCreator.setTopicEmptyReducer(false));
+  }
   GlobalStore.store
       .dispatch(GlobalReducerCreator.setSourceTypeReducer(SourceType.normal));
   await _getFirstPageInfoEntities(action, ctx, forceUpdate: true);
@@ -367,6 +393,9 @@ Future _onShowNormal(Action action, Context<InfoNavPageState> ctx) async {
 
 Future _onShowHistory(Action action, Context<InfoNavPageState> ctx) async {
   if (_isLoading(ctx.state)) return;
+  if (ctx.state.topicEmpty) {
+    ctx.dispatch(InfoNavPageReducerCreator.setTopicEmptyReducer(false));
+  }
   GlobalStore.store
       .dispatch(GlobalReducerCreator.setSourceTypeReducer(SourceType.history));
   final filterKeywords = ctx.state.filterKeywords;
@@ -381,6 +410,9 @@ Future _onShowHistory(Action action, Context<InfoNavPageState> ctx) async {
 
 Future _onShowFavorite(Action action, Context<InfoNavPageState> ctx) async {
   if (_isLoading(ctx.state)) return;
+  if (ctx.state.topicEmpty) {
+    ctx.dispatch(InfoNavPageReducerCreator.setTopicEmptyReducer(false));
+  }
   GlobalStore.store
       .dispatch(GlobalReducerCreator.setSourceTypeReducer(SourceType.favorite));
   final filterKeywords = ctx.state.filterKeywords;
@@ -1099,6 +1131,21 @@ void _delInfoEntityTagFromPage(
   }
 }
 
+void _delTagFromTopic(Context<InfoNavPageState> ctx, String tagName) {
+  final entityStates = ctx.state.getInfoEntitiesByTag(tagName);
+  if (entityStates != null) {
+    for (var entityState in entityStates) {
+      final index = entityState.id;
+      final tagParam = {
+        ParamNames.indexParam: index,
+        ParamNames.tagParam: tagName
+      };
+      ctx.dispatch(InfoEntityReducerCreator.delEntityTagReducer(tagParam));
+      ctx.dispatch(InfoNavPageReducerCreator.updateEntityItemReducer(index));
+    }
+  }
+}
+
 Future _clearInfoEntityCache(InfoNavPageState pageState) async {
   final condition = pageState.filterKeywords ?? '';
   final topicName = GlobalStore.currentTopicDef.topicName;
@@ -1131,4 +1178,10 @@ void _removeTopicIndex(List<InfoEntity> infoEntities) {
     infoEntities
         .removeWhere((entity) => entity.title == Constants.topIndexName);
   }
+}
+
+String _buildKeywordNavKeyName() {
+  final sourceType = GlobalStore.sourceType.toString();
+  final topicName = GlobalStore.currentTopicDef.topicName;
+  return Keys.currentKeywordNav + sourceType + topicName;
 }

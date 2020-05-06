@@ -22,6 +22,7 @@ class InfoNavPageState extends MutableSource
   bool jumpComplete = false;
   bool isKeywordNav = false;
   bool autoSearch = true;
+  bool topicEmpty = false;
   List<InfoEntity> infoEntities;
 
   @override
@@ -57,6 +58,7 @@ class InfoNavPageState extends MutableSource
       ..hasMoreEntities = hasMoreEntities
       ..nextPageNo = nextPageNo
       ..autoSearch = autoSearch
+      ..topicEmpty = topicEmpty
       ..infoEntities = infoEntities
       ..filterKeywords = filterKeywords
       ..jumpFlag = jumpFlag
@@ -124,6 +126,18 @@ class InfoNavPageState extends MutableSource
         .firstWhere((entity) => entity.keyId == entityId, orElse: () => null);
     if (infoEntity == null) return null;
     return infoEntity;
+  }
+
+  List<InfoEntity> getInfoEntitiesByTag(String tagName,
+      {List<InfoEntity> exInfoEntities}) {
+    final infoEntityList = exInfoEntities ?? infoEntities;
+    final infoEntitiesWithTag = infoEntityList.where((entity) {
+      final tagList = entity.entityTags.split(',');
+      final matchedTag =
+          tagList.firstWhere((tag) => tag == tagName, orElse: () => null);
+      return matchedTag != null;
+    });
+    return infoEntitiesWithTag;
   }
 
   int getPressedEntityId() {

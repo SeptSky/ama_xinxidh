@@ -102,8 +102,11 @@ Widget _buildInfoNavSearchBar(
 Widget _buildInfoNavContent(
     InfoNavPageState state, Dispatch dispatch, ViewService viewService) {
   final hasError = GlobalStore.hasError;
-  final hasData = !GlobalStore.searchMode ||
+  var hasData = !GlobalStore.searchMode ||
       state.infoEntities != null && state.infoEntities.length > 0;
+  if (hasData && state.topicEmpty) {
+    hasData = false;
+  }
   var contentWidget;
   if (hasError) {
     contentWidget = _buildEntityErrorBox(dispatch);
@@ -116,7 +119,10 @@ Widget _buildInfoNavContent(
 }
 
 Widget _buildEntityNotFoundBox(InfoNavPageState state, Dispatch dispatch) {
-  final hintText = state.autoSearch ? '在专题内未找到特征标签，按搜索键查找明细！' : '在专题内未找到匹配信息！';
+  var hintText = state.autoSearch ? '在专题内未找到特征标签，按搜索键查找明细！' : '在专题内未找到匹配信息！';
+  if (state.topicEmpty) {
+    hintText = '专题内容添加中……';
+  }
   return buildNotFoundBox(hintText, () {
     state.textController.clear();
     dispatch(InfoNavPageActionCreator.onSetFilteredKeyword(null));

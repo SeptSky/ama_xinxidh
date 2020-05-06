@@ -199,12 +199,11 @@ List<Widget> _buildTagActionList(
             style: TextStyle(color: actionColor)),
         onTap: () async =>
             _onDelTagFromEntity(entityState, dispatch, viewService)),
-    // SizedBox(height: 5),
-    // buildActionItem(
-    //     Text('删除当前专题标签【${entityState.performedTag}】',
-    //         style: TextStyle(color: actionColor)),
-    //     onTap: () =>
-    //         _onDelTagFromTopic(entityState, dispatch, viewService)),
+    SizedBox(height: 5),
+    buildActionItem(
+        Text('删除当前专题标签【${entityState.performedTag}】',
+            style: TextStyle(color: actionColor)),
+        onTap: () => _onDelTagFromTopic(entityState, dispatch, viewService)),
   ];
 }
 

@@ -17,6 +17,7 @@ enum InfoNavPageActionEnum {
   onDelInfoEntity,
   onAddInfoEntityTags,
   onDelInfoEntityTag,
+  onDelTagFromTopic,
   onSharePageUrl,
   onClearCache,
   onShowNormal,
@@ -38,6 +39,7 @@ enum InfoNavPageReducerEnum {
   setJumpCompletedFlagReducer,
   setIsKeywordNavReducer,
   setAutoSearchReducer,
+  setTopicEmptyReducer,
   updateEntityItemReducer,
 }
 
@@ -99,6 +101,10 @@ class InfoNavPageActionCreator {
   static Action onDelInfoEntityTag(dynamic delTagParam) {
     return Action(InfoNavPageActionEnum.onDelInfoEntityTag,
         payload: delTagParam);
+  }
+
+  static Action onDelTagFromTopic(String tagName) {
+    return Action(InfoNavPageActionEnum.onDelTagFromTopic, payload: tagName);
   }
 
   static Action onSharePageUrl(EntityState entity) {
@@ -182,6 +188,11 @@ class InfoNavPageReducerCreator {
   static Action setAutoSearchReducer(bool autoSearch) {
     return Action(InfoNavPageReducerEnum.setAutoSearchReducer,
         payload: autoSearch);
+  }
+
+  static Action setTopicEmptyReducer(bool topicEmpty) {
+    return Action(InfoNavPageReducerEnum.setTopicEmptyReducer,
+        payload: topicEmpty);
   }
 
   static Action updateEntityItemReducer(int index) {
