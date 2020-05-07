@@ -17,7 +17,6 @@ class InfoNavPageState extends MutableSource
   bool isLoading = false;
   bool hasMoreEntities = true;
   int nextPageNo = 0;
-  String filterKeywords;
   bool jumpFlag = false;
   bool jumpComplete = false;
   bool isKeywordNav = false;
@@ -39,6 +38,9 @@ class InfoNavPageState extends MutableSource
 
   @override
   AppConfig appConfig;
+  
+  @override
+  String filterKeywords;
 
   @override
   bool searchMode;

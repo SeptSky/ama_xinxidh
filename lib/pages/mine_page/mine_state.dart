@@ -24,6 +24,9 @@ class MineState implements GlobalBaseState, Cloneable<MineState> {
   AppConfig appConfig;
 
   @override
+  String filterKeywords;
+
+  @override
   bool searchMode;
 
   @override
@@ -39,6 +42,7 @@ class MineState implements GlobalBaseState, Cloneable<MineState> {
       ..currentTheme = currentTheme
       ..userInfo = userInfo
       ..appConfig = appConfig
+      ..filterKeywords = filterKeywords
       ..searchMode = searchMode
       ..sourceType = sourceType
       ..contentType = contentType;

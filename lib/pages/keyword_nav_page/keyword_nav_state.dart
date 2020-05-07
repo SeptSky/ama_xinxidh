@@ -38,6 +38,9 @@ class KeywordNavPageState extends MutableSource
   AppConfig appConfig;
 
   @override
+  String filterKeywords;
+
+  @override
   bool searchMode;
 
   @override
@@ -57,6 +60,7 @@ class KeywordNavPageState extends MutableSource
       ..currentTheme = currentTheme
       ..userInfo = userInfo
       ..appConfig = appConfig
+      ..filterKeywords = filterKeywords
       ..searchMode = searchMode
       ..sourceType = sourceType
       ..contentType = contentType;

@@ -33,6 +33,9 @@ class EntityEditState implements GlobalBaseState, Cloneable<EntityEditState> {
   AppConfig appConfig;
 
   @override
+  String filterKeywords;
+
+  @override
   bool searchMode;
 
   @override
@@ -52,6 +55,7 @@ class EntityEditState implements GlobalBaseState, Cloneable<EntityEditState> {
       ..currentTheme = currentTheme
       ..userInfo = userInfo
       ..appConfig = appConfig
+      ..filterKeywords = filterKeywords
       ..searchMode = searchMode
       ..sourceType = sourceType
       ..contentType = contentType;

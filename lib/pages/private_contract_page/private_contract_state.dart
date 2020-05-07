@@ -24,6 +24,9 @@ class PrivateContractState
   AppConfig appConfig;
 
   @override
+  String filterKeywords;
+
+  @override
   bool searchMode;
 
   @override
@@ -38,6 +41,7 @@ class PrivateContractState
       ..currentTheme = currentTheme
       ..userInfo = userInfo
       ..appConfig = appConfig
+      ..filterKeywords = filterKeywords
       ..searchMode = searchMode
       ..sourceType = sourceType
       ..contentType = contentType;

@@ -38,6 +38,7 @@ final AbstractRoutes routes = PageRoutes(
         if (pageState is Cloneable && appState.shouldUpdate(p)) {
           final Object copy = pageState.clone();
           final GlobalBaseState newState = copy;
+          newState.filterKeywords = appState.filterKeywords;
           newState.searchMode = appState.searchMode;
           newState.sourceType = appState.sourceType;
           newState.contentType = appState.contentType;

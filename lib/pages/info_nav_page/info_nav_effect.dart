@@ -108,13 +108,8 @@ Future _onSetFilteredKeyword(
     Action action, Context<InfoNavPageState> ctx) async {
   if (_isLoading(ctx.state)) return;
   final String filterKeywords = action.payload;
-  final hasFilters = filterKeywords != null && filterKeywords.length > 0;
-  ctx.broadcast(HomeActionCreator.onSetHasFilters(hasFilters));
-  // if (!ctx.state.jumpFlag &&
-  //     filterKeywords != null &&
-  //     filterKeywords == ctx.state.filterKeywords) return;
-  ctx.dispatch(
-      InfoNavPageReducerCreator.setFilteredKeywordReducer(filterKeywords));
+  GlobalStore.store
+      .dispatch(GlobalReducerCreator.setFilterKeywordsReducer(filterKeywords));
   Future.delayed(Duration.zero, () async {
     await _showInfoEntitiesBySourceType(ctx, action);
     if (filterKeywords != null) {
@@ -142,7 +137,8 @@ Future _onChangeTopicDef(Action action, Context<InfoNavPageState> ctx) async {
     }
     if (ctx.state.filterKeywords != null &&
         contentType != ContentType.relatedTopic) {
-      ctx.dispatch(InfoNavPageReducerCreator.setFilteredKeywordReducer(null));
+      GlobalStore.store
+          .dispatch(GlobalReducerCreator.setFilterKeywordsReducer(null));
     }
     await SharedUtil.instance.removeString(_buildKeywordNavKeyName());
     final topicDef = await InfoNavServices.getAppTopicFromWebApi(
@@ -168,12 +164,12 @@ Future _onChangeTopicDef(Action action, Context<InfoNavPageState> ctx) async {
 Future _onJumpToTopicDef(Action action, Context<InfoNavPageState> ctx) async {
   if (GlobalStore.hasError) return;
   if (_isLoading(ctx.state)) return;
-  final String topicNames = action.payload;
-  final List<String> topicNameList = topicNames.split(',');
+  final topicNames = action.payload;
+  final topicNameList = topicNames.split(',');
   if (topicNameList.length != 2) return;
   try {
-    ctx.dispatch(
-        InfoNavPageReducerCreator.setFilteredKeywordReducer(topicNameList[1]));
+    GlobalStore.store.dispatch(
+        GlobalReducerCreator.setFilterKeywordsReducer(topicNameList[1]));
     await SharedUtil.instance.removeString(Keys.currentKeywordNav);
     final topicDef = await InfoNavServices.getAppTopicFromWebApiByName(
         Xinxidh_App_Guid, topicNameList[0], true);
@@ -232,12 +228,10 @@ Future _onTagPressed(Action action, Context<InfoNavPageState> ctx) async {
   final tag = action.payload;
   var filterKeywords = ctx.state.filterKeywords;
   final newFilterKeywords = _getNewFilterKeywords(filterKeywords, tag);
-  ctx.dispatch(
-      InfoNavPageReducerCreator.setFilteredKeywordReducer(newFilterKeywords));
+  GlobalStore.store.dispatch(
+      GlobalReducerCreator.setFilterKeywordsReducer(newFilterKeywords));
   ctx.dispatch(
       InfoEntityReducerCreator.setFilteredKeywordReducer(newFilterKeywords));
-  final hasFilters = newFilterKeywords != null && newFilterKeywords.length > 0;
-  ctx.broadcast(HomeActionCreator.onSetHasFilters(hasFilters));
   await _showInfoEntitiesBySourceType(ctx, action);
 }
 
@@ -360,10 +354,11 @@ Future _onDelTagFromTopic(Action action, Context<InfoNavPageState> ctx) async {
   if (GlobalStore.hasError) return;
   try {
     final userName = GlobalStore.userInfo.userName;
-    final topicName = GlobalStore.currentTopicDef.topicName;
+    final topicKeyword = GlobalStore.currentTopicDef.topicKeyword;
     final tagName = action.payload;
-    await InfoNavServices.delTagFromTopic(userName, topicName, tagName);
-    _delTagFromTopic(ctx, tagName);
+    await InfoNavServices.delTagFromTopic(userName, topicKeyword, tagName);
+    _clearInfoEntityCache(ctx.state);
+    await _showInfoEntitiesBySourceType(ctx, action);
   } catch (err) {
     GlobalStore.store
         .dispatch(GlobalReducerCreator.setErrorStatusReducer(true));
@@ -474,8 +469,8 @@ Future _onSearchMatching(Action action, Context<InfoNavPageState> ctx) async {
     searchStr = ctx.state.textController.text;
     if (searchStr.isNotEmpty) {
       ctx.dispatch(InfoNavPageReducerCreator.setAutoSearchReducer(true));
-      ctx.dispatch(InfoNavPageReducerCreator.setFilteredKeywordReducer(null));
-      ctx.broadcast(HomeActionCreator.onSetHasFilters(false));
+      GlobalStore.store
+          .dispatch(GlobalReducerCreator.setFilterKeywordsReducer(null));
     }
   }
   if (searchStr == '') {
@@ -508,7 +503,8 @@ Future _onClearSearchText(Action action, Context<InfoNavPageState> ctx) async {
   }
   ctx.state.textController.clear();
   ctx.dispatch(InfoNavPageReducerCreator.setAutoSearchReducer(true));
-  ctx.dispatch(InfoNavPageReducerCreator.setFilteredKeywordReducer(null));
+  GlobalStore.store
+      .dispatch(GlobalReducerCreator.setFilterKeywordsReducer(null));
   await _showInfoEntitiesBySourceType(ctx, action);
 }
 
@@ -527,9 +523,8 @@ Future _onSearchRelatedTopics(
     if (_isLoadingSuccess(infoEntities)) {
       _changeSourceContentType(
           GlobalStore.sourceType, ContentType.relatedTopic, ctx);
-      ctx.dispatch(
-          InfoNavPageReducerCreator.setFilteredKeywordReducer(filterKeyword));
-      ctx.broadcast(HomeActionCreator.onSetHasFilters(true));
+      GlobalStore.store.dispatch(
+          GlobalReducerCreator.setFilterKeywordsReducer(filterKeyword));
       ctx.dispatch(InfoNavPageReducerCreator.initEntitiesReducer(infoEntities));
     } else {
       Dialogs.showInfoToast('无【$filterKeyword】关联专题', bgColor);
@@ -558,7 +553,7 @@ Future _getFirstPageInfoEntities(Action action, Context<InfoNavPageState> ctx,
       Tools.hasNotElements(ctx.state.infoEntities)) {
     final infoEntities =
         ctx.state.filterKeywords == null || ctx.state.filterKeywords == ''
-            ? await _getInfoEntities(ctx.state, true)
+            ? await _getInfoEntities(ctx.state, true, forceUpdate: forceUpdate)
             : await _getFilteredInfoEntities(ctx.state, true);
     if (_isLoadingSuccess(infoEntities)) {
       ctx.dispatch(InfoNavPageReducerCreator.initEntitiesReducer(infoEntities));
@@ -712,9 +707,11 @@ Future _showInfoEntitiesBySourceType(
 }
 
 Future<List<InfoEntity>> _getInfoEntities(
-    InfoNavPageState pageState, bool firstPage) async {
-  final int pageNo = firstPage ? 0 : pageState.nextPageNo;
-  return await _getInfoEntitiesByPageNo(pageState, pageNo);
+    InfoNavPageState pageState, bool firstPage,
+    {bool forceUpdate = false}) async {
+  final pageNo = firstPage ? 0 : pageState.nextPageNo;
+  return await _getInfoEntitiesByPageNo(pageState, pageNo,
+      forceUpdate: forceUpdate);
 }
 
 Future<List<InfoEntity>> _reloadInfoEntities(
@@ -743,13 +740,15 @@ Future<List<InfoEntity>> _reloadInfoEntities(
 }
 
 Future<List<InfoEntity>> _getInfoEntitiesByPageNo(
-    InfoNavPageState pageState, int pageNo) async {
+    InfoNavPageState pageState, int pageNo,
+    {bool forceUpdate = false}) async {
   if (GlobalStore.hasError) return pageState.infoEntities;
-  final TopicDef topic = GlobalStore.currentTopicDef;
+  final topic = GlobalStore.currentTopicDef;
   final userName = GlobalStore.userInfo.userName;
   final currKeyName = _buildEntityKeyName(topic.topicName, pageNo, '');
   try {
-    var infoEntities = await _loadLocalEntitiesPage(currKeyName);
+    var infoEntities =
+        forceUpdate ? null : await _loadLocalEntitiesPage(currKeyName);
     if (infoEntities != null) return infoEntities;
     infoEntities = await InfoNavServices.getInfoEntities(
         topic.topicFirst ? userName : topic.bgKeyword,
@@ -771,7 +770,8 @@ Future<List<InfoEntity>> _getInfoEntitiesByPageNo(
 }
 
 Future<List<InfoEntity>> _getFilteredInfoEntities(
-    InfoNavPageState pageState, bool firstPage) async {
+    InfoNavPageState pageState, bool firstPage,
+    {bool forceUpdate = false}) async {
   if (GlobalStore.hasError) return pageState.infoEntities;
   final userName = GlobalStore.userInfo.userName;
   final pageNo = firstPage ? 0 : pageState.nextPageNo;
@@ -779,7 +779,8 @@ Future<List<InfoEntity>> _getFilteredInfoEntities(
   final topic = GlobalStore.currentTopicDef;
   final currKeyName = _buildEntityKeyName(topic.topicName, pageNo, condition);
   try {
-    var infoEntities = await _loadLocalEntitiesPage(currKeyName);
+    var infoEntities =
+        forceUpdate ? null : await _loadLocalEntitiesPage(currKeyName);
     if (infoEntities != null) return infoEntities;
     infoEntities = await InfoNavServices.getFilteredInfoEntities(
         topic.topicFirst ? userName : topic.bgKeyword,
@@ -1190,21 +1191,6 @@ void _delInfoEntityTagFromPage(
     };
     ctx.dispatch(InfoEntityReducerCreator.delEntityTagReducer(tagParam));
     ctx.dispatch(InfoNavPageReducerCreator.updateEntityItemReducer(index));
-  }
-}
-
-void _delTagFromTopic(Context<InfoNavPageState> ctx, String tagName) {
-  final entityStates = ctx.state.getInfoEntitiesByTag(tagName);
-  if (entityStates != null) {
-    for (var entityState in entityStates) {
-      final index = entityState.id;
-      final tagParam = {
-        ParamNames.indexParam: index,
-        ParamNames.tagParam: tagName
-      };
-      ctx.dispatch(InfoEntityReducerCreator.delEntityTagReducer(tagParam));
-      ctx.dispatch(InfoNavPageReducerCreator.updateEntityItemReducer(index));
-    }
   }
 }
 

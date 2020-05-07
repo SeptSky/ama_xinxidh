@@ -6,6 +6,7 @@ import '../models/themes/theme_bean.dart';
 import '../models/users/user_info.dart';
 
 enum GlobalReducerEnum {
+  setFilterKeywordsReducer,
   setSearchModeReducer,
   setSourceTypeReducer,
   setContentTypeReducer,
@@ -17,6 +18,11 @@ enum GlobalReducerEnum {
 }
 
 class GlobalReducerCreator {
+  static Action setFilterKeywordsReducer(String filterKeywords) {
+    return Action(GlobalReducerEnum.setFilterKeywordsReducer,
+        payload: filterKeywords);
+  }
+
   static Action setSearchModeReducer(bool searchMode) {
     return Action(GlobalReducerEnum.setSearchModeReducer, payload: searchMode);
   }

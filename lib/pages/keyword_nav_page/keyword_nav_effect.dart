@@ -64,20 +64,6 @@ Future _init(Action action, Context<KeywordNavPageState> ctx) async {
   Future.delayed(Duration.zero, () async {
     if (_isLoading(ctx.state)) return;
     _onRefreshPage(action, ctx);
-    // var keywordNavEnv = await _readKeywordNavEnv(ctx);
-    // if (keywordNavEnv == null) {
-    //   _onGetFirstPageFilters(action, ctx);
-    // } else {
-    //   ctx.dispatch(
-    //       KeywordNavPageReducerCreator.resotreStateReducer(keywordNavEnv));
-    //   // 恢复后重新刷新特征组合条件：只有1列时，交给关联关键词页面刷新信息列表
-    //   if (ctx.state.keywordMode &&
-    //       ctx.state.getGridColCount() == Constants.maxColCount) {
-    //     final filterKeywords = ctx.state.getPressedPropertyFilterText();
-    //     ctx.broadcast(
-    //         InfoNavPageActionCreator.onSetFilteredKeyword(filterKeywords));
-    //   }
-    // }
   });
 }
 

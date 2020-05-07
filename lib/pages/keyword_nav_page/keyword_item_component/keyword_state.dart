@@ -31,6 +31,9 @@ class KeywordState implements GlobalBaseState, Cloneable<KeywordState> {
   AppConfig appConfig;
 
   @override
+  String filterKeywords;
+
+  @override
   bool searchMode;
 
   @override
@@ -50,6 +53,7 @@ class KeywordState implements GlobalBaseState, Cloneable<KeywordState> {
       ..currentTheme = currentTheme
       ..userInfo = userInfo
       ..appConfig = appConfig
+      ..filterKeywords = filterKeywords
       ..searchMode = searchMode
       ..sourceType = sourceType
       ..contentType = contentType;

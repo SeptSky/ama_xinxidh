@@ -36,7 +36,6 @@ enum InfoNavPageReducerEnum {
   setNextPageEntitiesReducer,
   setJumpPageEntitiesReducer,
   setIsLoadingFlagReducer,
-  setFilteredKeywordReducer,
   setJumpCompletedFlagReducer,
   setIsKeywordNavReducer,
   setAutoSearchReducer,
@@ -175,11 +174,6 @@ class InfoNavPageReducerCreator {
   static Action setIsLoadingFlagReducer(bool isLoading) {
     return Action(InfoNavPageReducerEnum.setIsLoadingFlagReducer,
         payload: isLoading);
-  }
-
-  static Action setFilteredKeywordReducer(String filteredKeyword) {
-    return Action(InfoNavPageReducerEnum.setFilteredKeywordReducer,
-        payload: filteredKeyword);
   }
 
   static Action setJumpCompletedFlagReducer() {

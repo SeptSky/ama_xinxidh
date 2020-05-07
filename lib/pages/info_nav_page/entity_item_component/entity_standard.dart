@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_custom_dialog/flutter_custom_dialog.dart';
 
 import '../../../common/consts/constants.dart';
+import '../../../common/consts/enum_types.dart';
 import '../../../common/consts/param_names.dart';
 import '../../../common/utilities/dialogs.dart';
 import '../../../global_store/global_store.dart';
@@ -329,9 +330,19 @@ void _onDelTagFromEntity(
 
 void _onDelTagFromTopic(
     EntityState entityState, Dispatch dispatch, ViewService viewService) async {
+  final sourceType = GlobalStore.sourceType;
+  final contentType = GlobalStore.contentType;
+  final bgColor = GlobalStore.themePrimaryIcon;
+  if (sourceType != SourceType.normal ||
+      contentType != ContentType.infoEntity) {
+    Dialogs.showInfoToast('只能在专题内删除指定的标签！', bgColor);
+    return;
+  }
   final result = await Dialogs.showConfirmDialog(
       viewService.context, '是否删除当前专题标签【${entityState.performedTag}】？');
   if (result == Constants.dialogYes) {
+    final tagName = entityState.performedTag;
+    dispatch(InfoNavPageActionCreator.onDelTagFromTopic(tagName));
     _setTagAction(entityState, dispatch, null, DisplayMode.normal);
   }
 }

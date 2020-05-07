@@ -34,6 +34,9 @@ class LoginState implements GlobalBaseState, Cloneable<LoginState> {
   AppConfig appConfig;
 
   @override
+  String filterKeywords;
+
+  @override
   bool searchMode;
 
   @override
@@ -58,6 +61,7 @@ class LoginState implements GlobalBaseState, Cloneable<LoginState> {
       ..currentTheme = currentTheme
       ..userInfo = userInfo
       ..appConfig = appConfig
+      ..filterKeywords = filterKeywords
       ..searchMode = searchMode
       ..sourceType = sourceType
       ..contentType = contentType;

@@ -24,6 +24,9 @@ class ResetPasswordState implements GlobalBaseState, Cloneable<ResetPasswordStat
   AppConfig appConfig;
 
   @override
+  String filterKeywords;
+
+  @override
   bool searchMode;
 
   @override
@@ -39,9 +42,7 @@ class ResetPasswordState implements GlobalBaseState, Cloneable<ResetPasswordStat
       ..currentTheme = currentTheme
       ..userInfo = userInfo
       ..appConfig = appConfig
-      ..searchMode = searchMode
-      ..sourceType = sourceType
-      ..appConfig = appConfig
+      ..filterKeywords = filterKeywords
       ..searchMode = searchMode
       ..sourceType = sourceType
       ..contentType = contentType;

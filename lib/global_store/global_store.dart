@@ -88,6 +88,10 @@ class GlobalStore {
     return TextStyle(fontSize: 15.0);
   }
 
+  static String get filterKeywords {
+    return store.getState().filterKeywords;
+  }
+
   static bool get searchMode {
     return store.getState().searchMode ?? false;
   }
@@ -135,11 +139,11 @@ class GlobalStore {
     final globalState = store.getState();
     final cache = SharedUtil.instance;
     final isFirstRun = await cache.getBoolean(Keys.isFirstRun);
-    final latestMessage = await cache.getString(Keys.latestMessage);
+    // final latestMessage = await cache.getString(Keys.latestMessage);
     await cache.clearCacheData();
     final appConfig = globalState.appConfig;
     await cache.saveBoolean(Keys.isFirstRun, isFirstRun);
-    await cache.saveString(Keys.latestMessage, latestMessage);
+    // await cache.saveString(Keys.latestMessage, latestMessage);
     await cache.saveString(Keys.appConfig, jsonEncode(appConfig.toJson()));
     if (appConfig.topic.topicId == Constants.indexTopicId) {
       await cache.saveString(

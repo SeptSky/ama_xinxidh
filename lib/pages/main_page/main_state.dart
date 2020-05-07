@@ -23,6 +23,9 @@ class MainState implements GlobalBaseState, Cloneable<MainState> {
   AppConfig appConfig;
   
   @override
+  String filterKeywords;
+
+  @override
   bool searchMode;
 
   @override
@@ -37,6 +40,7 @@ class MainState implements GlobalBaseState, Cloneable<MainState> {
       ..currentTheme = currentTheme
       ..userInfo = userInfo
       ..appConfig = appConfig
+      ..filterKeywords = filterKeywords
       ..searchMode = searchMode
       ..sourceType = sourceType
       ..contentType = contentType;

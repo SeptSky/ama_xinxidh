@@ -6,6 +6,7 @@ import 'global_state.dart';
 Reducer<GlobalState> buildReducer() {
   return asReducer(
     <Object, Reducer<GlobalState>>{
+      GlobalReducerEnum.setFilterKeywordsReducer: _setFilterKeywordsReducer,
       GlobalReducerEnum.setSearchModeReducer: _setSearchModeReducer,
       GlobalReducerEnum.setSourceTypeReducer: _setSourceTypeReducer,
       GlobalReducerEnum.setContentTypeReducer: _setContentTypeReducer,
@@ -16,6 +17,12 @@ Reducer<GlobalState> buildReducer() {
       GlobalReducerEnum.setUserInfoReducer: _setUserInfoReducer,
     },
   );
+}
+
+GlobalState _setFilterKeywordsReducer(GlobalState state, Action action) {
+  final filterKeywords = action.payload;
+  if (filterKeywords == state.filterKeywords) return state;
+  return state.clone()..filterKeywords = filterKeywords;
 }
 
 GlobalState _setSearchModeReducer(GlobalState state, Action action) {

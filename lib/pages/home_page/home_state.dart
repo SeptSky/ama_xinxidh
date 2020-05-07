@@ -12,7 +12,6 @@ class HomeState with MapLike implements GlobalBaseState, Cloneable<HomeState> {
   DateTime prevPopTime;
   DateTime lastPopTime;
   bool isFirstRun;
-  bool hasFilters;
 
   bool get acceptBackPressing {
     return iconQuarterTurns != 0 ||
@@ -26,10 +25,10 @@ class HomeState with MapLike implements GlobalBaseState, Cloneable<HomeState> {
       ..prevPopTime = prevPopTime
       ..lastPopTime = lastPopTime
       ..isFirstRun = isFirstRun
-      ..hasFilters = hasFilters
       ..currentTheme = currentTheme
       ..userInfo = userInfo
       ..appConfig = appConfig
+      ..filterKeywords = filterKeywords
       ..searchMode = searchMode
       ..sourceType = sourceType
       ..contentType = contentType;
@@ -51,6 +50,9 @@ class HomeState with MapLike implements GlobalBaseState, Cloneable<HomeState> {
   AppConfig appConfig;
 
   @override
+  String filterKeywords;
+
+  @override
   bool searchMode;
 
   @override
@@ -65,6 +67,5 @@ HomeState initState(Map<String, dynamic> args) {
     ..iconQuarterTurns = 0
     ..prevPopTime = DateTime.now().add(Duration(minutes: -1))
     ..lastPopTime = DateTime.now()
-    ..isFirstRun = Globals.isFirstRun
-    ..hasFilters = false;
+    ..isFirstRun = Globals.isFirstRun;
 }

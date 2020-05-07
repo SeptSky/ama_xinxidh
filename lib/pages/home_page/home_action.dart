@@ -7,7 +7,6 @@ enum HomeActionEnum {
   onToggleKeywordSheet,
   onCloseKeywordSheet,
   onOpenDrawer,
-  onSetHasFilters,
   onAddEntity,
   onChangeUser,
 }
@@ -16,7 +15,6 @@ enum HomeReducerEnum {
   startupAppReducer,
   toggleIconReducer,
   setLastPopTimeReducer,
-  setHasFiltersReducer,
 }
 
 class HomeActionCreator {
@@ -40,10 +38,6 @@ class HomeActionCreator {
     return Action(HomeActionEnum.onOpenDrawer, payload: context);
   }
 
-  static Action onSetHasFilters(bool hasFilters) {
-    return Action(HomeActionEnum.onSetHasFilters, payload: hasFilters);
-  }
-
   static Action onAddEntity() {
     return const Action(HomeActionEnum.onAddEntity);
   }
@@ -64,9 +58,5 @@ class HomeReducerCreator {
 
   static Action setLastPopTimeReducer(DateTime currentTime) {
     return Action(HomeReducerEnum.setLastPopTimeReducer, payload: currentTime);
-  }
-
-  static Action setHasFiltersReducer(bool hasFilters) {
-    return Action(HomeReducerEnum.setHasFiltersReducer, payload: hasFilters);
   }
 }

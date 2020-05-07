@@ -23,6 +23,9 @@ class HelpState implements GlobalBaseState, Cloneable<HelpState> {
   AppConfig appConfig;
 
   @override
+  String filterKeywords;
+
+  @override
   bool searchMode;
 
   @override
@@ -37,6 +40,7 @@ class HelpState implements GlobalBaseState, Cloneable<HelpState> {
       ..currentTheme = currentTheme
       ..userInfo = userInfo
       ..appConfig = appConfig
+      ..filterKeywords = filterKeywords
       ..searchMode = searchMode
       ..sourceType = sourceType
       ..contentType = contentType;

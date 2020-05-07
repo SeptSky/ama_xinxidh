@@ -9,6 +9,9 @@ abstract class GlobalBaseState {
   bool get hasError;
   set hasError(bool hasError);
 
+  String get filterKeywords;
+  set filterKeywords(String filterKeywords);
+
   bool get searchMode;
   set searchMode(bool searchMode);
 
@@ -48,17 +51,21 @@ class GlobalState implements GlobalBaseState, Cloneable<GlobalState> {
   AppConfig appConfig;
 
   @override
+  String filterKeywords;
+
+  @override
   bool searchMode = false;
 
   @override
   SourceType sourceType = SourceType.normal;
-  
+
   @override
   ContentType contentType = ContentType.infoEntity;
 
   @override
   GlobalState clone() {
     return GlobalState()
+      ..filterKeywords = filterKeywords
       ..searchMode = searchMode
       ..sourceType = sourceType
       ..contentType = contentType
@@ -74,6 +81,8 @@ class GlobalState implements GlobalBaseState, Cloneable<GlobalState> {
     assert(state != null);
     return !(searchMode != null &&
         searchMode == state.searchMode &&
+        filterKeywords != null &&
+        filterKeywords == state.filterKeywords &&
         sourceType != null &&
         sourceType == state.sourceType &&
         contentType != null &&

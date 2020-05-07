@@ -9,7 +9,6 @@ Reducer<HomeState> buildReducer() {
       HomeReducerEnum.startupAppReducer: _startupAppReducer,
       HomeReducerEnum.toggleIconReducer: _toggleIconReducer,
       HomeReducerEnum.setLastPopTimeReducer: _setLastPopTimeReducer,
-      HomeReducerEnum.setHasFiltersReducer: _setHasFiltersReducer,
     },
   );
 }
@@ -28,10 +27,5 @@ HomeState _setLastPopTimeReducer(HomeState state, Action action) {
   final newState = state.clone();
   newState.prevPopTime = newState.lastPopTime;
   newState.lastPopTime = action.payload;
-  return newState;
-}
-
-HomeState _setHasFiltersReducer(HomeState state, Action action) {
-  final newState = state.clone()..hasFilters = action.payload;
   return newState;
 }

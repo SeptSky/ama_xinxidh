@@ -25,7 +25,6 @@ Effect<HomeState> buildEffect() {
     HomeActionEnum.onProcessBackKey: _processBackKey,
     HomeActionEnum.onToggleKeywordSheet: _onToggleKeywordSheet,
     HomeActionEnum.onCloseKeywordSheet: _onCloseKeywordSheet,
-    HomeActionEnum.onSetHasFilters: _onSetHasFilters,
     HomeActionEnum.onOpenDrawer: _openDrawer,
     HomeActionEnum.onAddEntity: _onAddEntity,
     HomeActionEnum.onChangeUser: _onChangeUser,
@@ -44,7 +43,8 @@ void _processBackKey(Action action, Context<HomeState> ctx) {
     _toggleKeywordNav(0, ctx);
     return;
   }
-  if (ctx.state.hasFilters) {
+  if (GlobalStore.filterKeywords != null &&
+      GlobalStore.filterKeywords.length > 0) {
     if (!GlobalStore.searchMode) {
       ctx.broadcast(InfoNavPageActionCreator.onSetFilteredKeyword(null));
     } else {
@@ -130,13 +130,6 @@ void _onCloseKeywordSheet(Action action, Context<HomeState> ctx) {
       Navigator.of(ctx.context).pop();
     }
     ctx.dispatch(HomeReducerCreator.toggleIconReducer(0));
-  }
-}
-
-void _onSetHasFilters(Action action, Context<HomeState> ctx) {
-  final bool hasFilters = action.payload;
-  if (hasFilters != ctx.state.hasFilters) {
-    ctx.dispatch(HomeReducerCreator.setHasFiltersReducer(hasFilters));
   }
 }
 

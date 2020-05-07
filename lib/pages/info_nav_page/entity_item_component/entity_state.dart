@@ -31,7 +31,6 @@ class EntityState implements GlobalBaseState, Cloneable<EntityState> {
   bool selectable;
   bool isKeywordNav;
   bool favorite = false;
-  String filterKeywords;
   String performedTag;
   DisplayMode displayMode = DisplayMode.normal;
 
@@ -60,6 +59,9 @@ class EntityState implements GlobalBaseState, Cloneable<EntityState> {
 
   @override
   AppConfig appConfig;
+
+  @override
+  String filterKeywords;
 
   @override
   bool searchMode;

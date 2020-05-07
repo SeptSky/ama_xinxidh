@@ -25,6 +25,9 @@ class IntroState implements GlobalBaseState, Cloneable<IntroState> {
   AppConfig appConfig;
 
   @override
+  String filterKeywords;
+
+  @override
   bool searchMode;
 
   @override
@@ -40,6 +43,7 @@ class IntroState implements GlobalBaseState, Cloneable<IntroState> {
       ..currentTheme = currentTheme
       ..userInfo = userInfo
       ..appConfig = appConfig
+      ..filterKeywords = filterKeywords
       ..searchMode = searchMode
       ..sourceType = sourceType
       ..contentType = contentType;

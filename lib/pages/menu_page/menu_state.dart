@@ -14,6 +14,7 @@ class MenuState implements GlobalBaseState, Cloneable<MenuState> {
       ..currentTheme = currentTheme
       ..userInfo = userInfo
       ..appConfig = appConfig
+      ..filterKeywords = filterKeywords
       ..searchMode = searchMode
       ..sourceType = sourceType
       ..contentType = contentType;
@@ -33,6 +34,9 @@ class MenuState implements GlobalBaseState, Cloneable<MenuState> {
 
   @override
   AppConfig appConfig;
+
+  @override
+  String filterKeywords;
 
   @override
   bool searchMode;

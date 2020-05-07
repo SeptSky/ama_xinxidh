@@ -19,8 +19,6 @@ Reducer<InfoNavPageState> buildReducer() {
       InfoNavPageReducerEnum.setJumpPageEntitiesReducer:
           _setJumpPageEntitiesReducer,
       InfoNavPageReducerEnum.setIsLoadingFlagReducer: _setIsLoadingFlagReducer,
-      InfoNavPageReducerEnum.setFilteredKeywordReducer:
-          _setFilteredKeywordReducer,
       InfoNavPageReducerEnum.updateEntityItemReducer: _updateEntityItemReducer,
       InfoNavPageReducerEnum.setJumpCompletedFlagReducer:
           _setJumpCompletedFlagReducer,
@@ -123,16 +121,16 @@ InfoNavPageState _setIsLoadingFlagReducer(
   return newState;
 }
 
-InfoNavPageState _setFilteredKeywordReducer(
-    InfoNavPageState state, Action action) {
-  final filterKeywords = action.payload;
-  if (filterKeywords == state.filterKeywords) return state;
-  final newState = state.clone()
-    ..filterKeywords = filterKeywords
-    ..jumpFlag = false
-    ..jumpComplete = false;
-  return newState;
-}
+// InfoNavPageState _setFilteredKeywordReducer(
+//     InfoNavPageState state, Action action) {
+//   final filterKeywords = action.payload;
+//   if (filterKeywords == state.filterKeywords) return state;
+//   final newState = state.clone()
+//     ..filterKeywords = filterKeywords
+//     ..jumpFlag = false
+//     ..jumpComplete = false;
+//   return newState;
+// }
 
 InfoNavPageState _updateEntityItemReducer(
     InfoNavPageState state, Action action) {
