@@ -27,6 +27,7 @@ enum InfoNavPageActionEnum {
   onSetSearchMode,
   onSearchMatching,
   onClearSearchText,
+  onSearchRelatedTopics,
 }
 
 enum InfoNavPageReducerEnum {
@@ -142,6 +143,11 @@ class InfoNavPageActionCreator {
 
   static Action onClearSearchText() {
     return Action(InfoNavPageActionEnum.onClearSearchText);
+  }
+
+  static Action onSearchRelatedTopics(String filterKeyword) {
+    return Action(InfoNavPageActionEnum.onSearchRelatedTopics,
+        payload: filterKeyword);
   }
 }
 

@@ -57,14 +57,13 @@ Container buildKeywordTitle(
 
 Widget _buildKeywordTitle(IconData iconName, KeywordState keywordState,
     Dispatch dispatch, ViewService viewService) {
-  final bgColor = GlobalStore.themePrimaryIcon;
   return Expanded(
       child: InkWell(
           child: _buildKeywordButton(iconName, keywordState),
           onTap:
               _buildKeywordTitleTapAction(keywordState, dispatch, viewService),
           onLongPress: () =>
-              Dialogs.showInfoToast(keywordState.title, bgColor)));
+              _onRelatedTopicPressed(keywordState, dispatch, viewService)));
 }
 
 Function _buildKeywordTitleTapAction(
@@ -115,6 +114,13 @@ void _onKeywordTitlePressed(
   dispatch(KeywordReducerCreator.pressFilterReducer(keywordState.index));
   // 修改Item状态，并跨页面调用InfoNavPage的Effect行为
   dispatch(KeywordNavPageActionCreator.onPressFilterAction(keywordState.title));
+}
+
+void _onRelatedTopicPressed(
+    KeywordState keywordState, Dispatch dispatch, ViewService viewService) {
+  final filterKeyword = keywordState.title;
+  viewService
+      .broadcast(InfoNavPageActionCreator.onSearchRelatedTopics(filterKeyword));
 }
 
 void _onAddKeywordIconPressed(

@@ -4,4 +4,4 @@
 enum WeChatScene { SESSION, TIMELINE, FAVORITE }
 
 enum SourceType { normal, history, favorite }
-enum ContentType { infoEntity, keyword, pageLink }
+enum ContentType { infoEntity, keyword, pageLink, relatedTopic }

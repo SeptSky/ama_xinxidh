@@ -798,6 +798,25 @@ class InfoNavServices {
         .toList();
   }
 
+  static Future<List<InfoEntity>> getRelatedTopicEntities(
+      String userName,
+      String topicKeyword,
+      String filterKeyword,
+      int pageNo,
+      int pageSize,
+      bool cacheFlag) async {
+    final argObj = {
+      "ArgJsonText":
+          "string=$userName;string=$topicKeyword;string=$filterKeyword;int=$pageNo;int=$pageSize;",
+      "ServiceGuid": "$InfoNavigation_Service",
+      "MethodName": "$GetRelatedTopicEntities_Method",
+    };
+    final jsonItems = await _invokeInfoIndexApi(argObj, cacheFlag);
+    final infoEntities =
+        jsonItems.map<InfoEntity>((item) => InfoEntity.fromJson(item)).toList();
+    return _initializeInfoEntities(infoEntities, pageNo, pageSize);
+  }
+
   static Future<String> addInfoEntityTags(
       String userName, int entityId, String tagNames) async {
     tagNames = DataFormat.formatArgument(tagNames);

@@ -115,7 +115,7 @@ Container _buildFilterBottomBar(
         _buildFilterButtonRow(pressedFilterCount, state, dispatch, viewService),
         _buildHintInfoMarquee(pressedFilterCount, state.keywordMode),
         const SizedBox(width: 10),
-        _buildTopicMenuButton(state, dispatch, viewService),
+        _buildAlphabetKeywordButton(state, dispatch, viewService),
         const SizedBox(width: 10),
       ],
     ),
@@ -136,7 +136,7 @@ Container _buildFilterActionBar(
         _buildFilterButtonRow(pressedFilterCount, state, dispatch, viewService),
         _buildHintInfoMarquee(pressedFilterCount, state.keywordMode),
         const SizedBox(width: 10),
-        _buildTopicMenuButton(state, dispatch, viewService),
+        _buildAlphabetKeywordButton(state, dispatch, viewService),
         const SizedBox(width: 10),
       ],
     ),
@@ -244,7 +244,7 @@ InkWell _buildResetButton(Dispatch dispatch, ViewService viewService) {
   );
 }
 
-Widget _buildTopicMenuButton(
+Widget _buildAlphabetKeywordButton(
     KeywordNavPageState state, Dispatch dispatch, ViewService viewService) {
   if (GlobalStore.appConfig.topic == null) return SizedBox();
   final color = GlobalStore.themeBlack;

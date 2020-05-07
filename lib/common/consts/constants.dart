@@ -22,6 +22,7 @@ class Constants {
   static const indexKeyword = '检索';
   static const historyEntity = '历史';
   static const favoriteEntity = '收藏';
+  static const relatedTopic = '关联专题';
   static const searchKeyword = '搜索：';
   static const topIndexName = '信息专题检索';
   static const refReadingMode = '参照阅读';

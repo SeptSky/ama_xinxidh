@@ -191,6 +191,13 @@ List<Widget> _buildTagActionList(
     EntityState entityState, Dispatch dispatch, ViewService viewService) {
   final actionColor = GlobalStore.themePrimaryIcon;
   return [
+    buildActionItem(
+        Text('查找【${entityState.performedTag}】关联专题',
+            style: TextStyle(color: actionColor)),
+        onTap: () async => dispatch(
+            InfoNavPageActionCreator.onSearchRelatedTopics(
+                entityState.performedTag))),
+    SizedBox(height: 5),
     buildActionItem(Text('添加新标签', style: TextStyle(color: actionColor)),
         onTap: () => _onAddNewTag(entityState, dispatch, viewService)),
     SizedBox(height: 5),
@@ -270,6 +277,8 @@ void _onTagLongPressed(EntityState entityState, Dispatch dispatch, String tag) {
   final roleId = GlobalStore.userInfo.roleId;
   if (roleId == Constants.superAdminRoleId) {
     _setTagAction(entityState, dispatch, tag, DisplayMode.tagAction);
+  } else {
+    dispatch(InfoNavPageActionCreator.onSearchRelatedTopics(tag));
   }
 }
 

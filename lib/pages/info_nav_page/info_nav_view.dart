@@ -18,7 +18,10 @@ Widget buildView(
     InfoNavPageState state, Dispatch dispatch, ViewService viewService) {
   var title = _getInfoNavTitle(state);
   if (state.filterKeywords != null && state.filterKeywords != '') {
-    title = "组合条件：${state.filterKeywords}";
+    final relatedTopic = GlobalStore.contentType == ContentType.relatedTopic;
+    title = relatedTopic
+        ? "关联特征：${state.filterKeywords}"
+        : "组合条件：${state.filterKeywords}";
   }
   final searchMode = GlobalStore.searchMode;
   final showShortIcon =

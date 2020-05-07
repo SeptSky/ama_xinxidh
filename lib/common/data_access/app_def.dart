@@ -59,6 +59,7 @@ const GetFilteredEntityTypeList_Method = 'GetFilteredEntityTypeList';
 const GetSearchingMatchedKeywords_Method = 'GetSearchingMatchedKeywords';
 const GetSearchingMatchedKeywordsFavorite_Method = 'GetSearchingMatchedKeywordsFavorite';
 const GetSearchingMatchedKeywordsHistory_Method = 'GetSearchingMatchedKeywordsHistory';
+const GetRelatedTopicEntities_Method = 'GetRelatedTopicEntities';
 const GetTopicTagsPyCodes_Method = 'GetTopicTagsPyCodes';
 const GetFavoriteTagsPyCodes_Method = 'GetFavoriteTagsPyCodes';
 const GetHistoryTagsPyCodes_Method = 'GetHistoryTagsPyCodes';

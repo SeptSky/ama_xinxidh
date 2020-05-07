@@ -53,6 +53,7 @@ Effect<InfoNavPageState> buildEffect() {
     InfoNavPageActionEnum.onSetSearchMode: _onSetSearchMode,
     InfoNavPageActionEnum.onSearchMatching: _onSearchMatching,
     InfoNavPageActionEnum.onClearSearchText: _onClearSearchText,
+    InfoNavPageActionEnum.onSearchRelatedTopics: _onSearchRelatedTopics,
   });
 }
 
@@ -133,10 +134,14 @@ Future _onChangeTopicDef(Action action, Context<InfoNavPageState> ctx) async {
     if (ctx.state.topicEmpty) {
       ctx.dispatch(InfoNavPageReducerCreator.setTopicEmptyReducer(false));
     }
-    if (GlobalStore.sourceType != SourceType.normal) {
+    final sourceType = GlobalStore.sourceType;
+    final contentType = GlobalStore.contentType;
+    if (sourceType != SourceType.normal ||
+        contentType != ContentType.infoEntity) {
       _changeSourceContentType(SourceType.normal, ContentType.infoEntity, ctx);
     }
-    if (ctx.state.filterKeywords != null) {
+    if (ctx.state.filterKeywords != null &&
+        contentType != ContentType.relatedTopic) {
       ctx.dispatch(InfoNavPageReducerCreator.setFilteredKeywordReducer(null));
     }
     await SharedUtil.instance.removeString(_buildKeywordNavKeyName());
@@ -240,7 +245,8 @@ Future _onToggleKeywordNav(Action action, Context<InfoNavPageState> ctx) async {
   final bool isKeywordNav = action.payload;
   if (ctx.state.isLoading ||
       isKeywordNav == ctx.state.isKeywordNav ||
-      GlobalStore.contentType == ContentType.keyword) return;
+      GlobalStore.contentType == ContentType.keyword ||
+      GlobalStore.contentType == ContentType.relatedTopic) return;
   ctx.dispatch(InfoNavPageReducerCreator.setIsKeywordNavReducer(isKeywordNav));
   await _showInfoEntitiesBySourceType(ctx, action);
   if (isKeywordNav) {
@@ -504,6 +510,33 @@ Future _onClearSearchText(Action action, Context<InfoNavPageState> ctx) async {
   ctx.dispatch(InfoNavPageReducerCreator.setAutoSearchReducer(true));
   ctx.dispatch(InfoNavPageReducerCreator.setFilteredKeywordReducer(null));
   await _showInfoEntitiesBySourceType(ctx, action);
+}
+
+Future _onSearchRelatedTopics(
+    Action action, Context<InfoNavPageState> ctx) async {
+  if (GlobalStore.hasError) {
+    GlobalStore.store
+        .dispatch(GlobalReducerCreator.setErrorStatusReducer(false));
+  }
+  final filterKeyword = action.payload;
+  final bgColor = GlobalStore.themePrimaryIcon;
+  Dialogs.showInfoToast('查找【$filterKeyword】关联专题', bgColor);
+  ctx.dispatch(InfoNavPageReducerCreator.setIsLoadingFlagReducer(true));
+  try {
+    final infoEntities = await _getRelatedTopics(ctx.state, filterKeyword, 0);
+    if (_isLoadingSuccess(infoEntities)) {
+      _changeSourceContentType(
+          GlobalStore.sourceType, ContentType.relatedTopic, ctx);
+      ctx.dispatch(
+          InfoNavPageReducerCreator.setFilteredKeywordReducer(filterKeyword));
+      ctx.broadcast(HomeActionCreator.onSetHasFilters(true));
+      ctx.dispatch(InfoNavPageReducerCreator.initEntitiesReducer(infoEntities));
+    } else {
+      Dialogs.showInfoToast('无【$filterKeyword】关联专题', bgColor);
+    }
+  } finally {
+    ctx.dispatch(InfoNavPageReducerCreator.setIsLoadingFlagReducer(false));
+  }
 }
 
 void _scrollToPressedEntity(int entityId, Context<InfoNavPageState> ctx) {
@@ -963,6 +996,33 @@ Future<List<InfoEntity>> _getSearchMatchingKeywordsHistory(
   }
 }
 
+Future<List<InfoEntity>> _getRelatedTopics(
+    InfoNavPageState pageState, String filterKeyword, int pageNo) async {
+  if (GlobalStore.hasError) return pageState.infoEntities;
+  final userName = GlobalStore.userInfo.userName;
+  final topicKeyword = GlobalStore.currentTopicDef.topicKeyword;
+  final condition = topicKeyword + '_' + filterKeyword;
+  final currKeyName =
+      _buildEntityKeyName(Constants.relatedTopic, pageNo, condition);
+  try {
+    var infoEntities = await _loadLocalEntitiesPage(currKeyName);
+    if (infoEntities != null) return infoEntities;
+    infoEntities = await InfoNavServices.getRelatedTopicEntities(
+        userName,
+        topicKeyword,
+        filterKeyword,
+        pageNo,
+        Constants.pageSize,
+        Constants.cacheFlagEntity);
+    await _saveLocalEntitiesPage(currKeyName, infoEntities);
+    return infoEntities;
+  } catch (err) {
+    GlobalStore.store
+        .dispatch(GlobalReducerCreator.setErrorStatusReducer(true));
+    return null;
+  }
+}
+
 void _mergeMatchingKeywords(List<InfoEntity> infoEntities) {
   for (var i = 0; i < infoEntities.length; i++) {
     if (i % 2 == 1) continue;
@@ -1026,14 +1086,16 @@ String _buildEntityTagNames(String orgTagNames) {
 
 bool _isLoadingSuccess(List<InfoEntity> infoEntities) {
   if (GlobalStore.hasError) return false;
+  var success = true;
   if (infoEntities == null) {
     try {
       InfoNavServices.clearDataCache();
     } catch (err) {}
   } else {
     _removeTopicIndex(infoEntities);
+    success = infoEntities.length > 0;
   }
-  return true;
+  return success;
 }
 
 Future _openInfoEntity(EntityState entityState) async {
