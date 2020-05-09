@@ -4,6 +4,7 @@ import 'package:flutter_markdown/flutter_markdown.dart';
 
 import '../../../common/consts/constants.dart';
 import '../../../common/utilities/tools.dart';
+import '../../../global_store/global_store.dart';
 import '../info_nav_action.dart';
 import 'entity_standard.dart';
 import 'entity_state.dart';
@@ -53,11 +54,12 @@ Widget _buildParagraphContentSection(
 }
 
 bool _isTagShown(EntityState entityState) {
-  var tagShown = entityState.filterKeywords != null &&
-      entityState.filterKeywords != '' &&
+  final filterKeywords = GlobalStore.filterKeywords;
+  var tagShown = filterKeywords != null &&
+      filterKeywords != '' &&
       !entityState.isKeywordNav;
   if (tagShown) {
-    var filterList = entityState.filterKeywords.split(',');
+    var filterList = filterKeywords.split(',');
     filterList.removeWhere((filter) => filter == Constants.refReadingMode);
     if (filterList.length == 0) {
       tagShown = false;

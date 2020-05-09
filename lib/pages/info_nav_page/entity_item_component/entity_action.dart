@@ -28,7 +28,6 @@ class InfoEntityActionCreator {
 
 enum InfoEntityReducerEnum {
   setPressedFlagReducer,
-  setFilteredKeywordReducer,
   setDisplayModeReducer,
   toggleFavoriteReducer,
   addEntityTagsReducer,
@@ -38,11 +37,6 @@ enum InfoEntityReducerEnum {
 class InfoEntityReducerCreator {
   static Action setPressedFlagReducer(int index) {
     return Action(InfoEntityReducerEnum.setPressedFlagReducer, payload: index);
-  }
-
-  static Action setFilteredKeywordReducer(String filterKeywords) {
-    return Action(InfoEntityReducerEnum.setFilteredKeywordReducer,
-        payload: filterKeywords);
   }
 
   static Action setDisplayModeReducer(dynamic displayMode) {

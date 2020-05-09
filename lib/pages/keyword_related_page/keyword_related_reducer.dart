@@ -13,8 +13,6 @@ Reducer<KeywordRelatedPageState> buildReducer() {
       KeywordRelatedPageReducerEnum.initKeywordsReducer: _initKeywordsReducer,
       KeywordRelatedPageReducerEnum.setNextPageKeywordsReducer:
           _setNextPageKeywordsReducer,
-      KeywordRelatedPageReducerEnum.setFilterKeywordsReducer:
-          _setFilterKeywordsReducer,
       KeywordRelatedPageReducerEnum.setIsLoadingFlagReducer:
           _setIsLoadingFlagReducer,
       KeywordRelatedPageReducerEnum.restoreStateReducer: _restoreStateReducer,

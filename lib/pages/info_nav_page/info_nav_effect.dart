@@ -136,7 +136,7 @@ Future _onChangeTopicDef(Action action, Context<InfoNavPageState> ctx) async {
         contentType != ContentType.infoEntity) {
       _changeSourceContentType(SourceType.normal, ContentType.infoEntity, ctx);
     }
-    if (ctx.state.filterKeywords != null &&
+    if (GlobalStore.filterKeywords != null &&
         contentType != ContentType.relatedTopic) {
       GlobalStore.store
           .dispatch(GlobalReducerCreator.setFilterKeywordsReducer(null));
@@ -227,12 +227,10 @@ Future _onTagPressed(Action action, Context<InfoNavPageState> ctx) async {
   if (GlobalStore.hasError) return;
   if (_isLoading(ctx.state)) return;
   final tag = action.payload;
-  var filterKeywords = ctx.state.filterKeywords;
+  final filterKeywords = GlobalStore.filterKeywords;
   final newFilterKeywords = _getNewFilterKeywords(filterKeywords, tag);
   GlobalStore.store.dispatch(
       GlobalReducerCreator.setFilterKeywordsReducer(newFilterKeywords));
-  ctx.dispatch(
-      InfoEntityReducerCreator.setFilteredKeywordReducer(newFilterKeywords));
   await _showInfoEntitiesBySourceType(ctx, action);
 }
 
@@ -400,7 +398,7 @@ Future _onShowHistory(Action action, Context<InfoNavPageState> ctx) async {
   }
   GlobalStore.store
       .dispatch(GlobalReducerCreator.setSourceTypeReducer(SourceType.history));
-  final filterKeywords = ctx.state.filterKeywords;
+  final filterKeywords = GlobalStore.filterKeywords;
   final infoEntities = filterKeywords == null || filterKeywords == ''
       ? await _getHistoryInfoEntities(ctx.state, 0)
       : await _getFilteredHistoryInfoEntities(ctx.state, filterKeywords, 0);
@@ -417,7 +415,7 @@ Future _onShowFavorite(Action action, Context<InfoNavPageState> ctx) async {
   }
   GlobalStore.store
       .dispatch(GlobalReducerCreator.setSourceTypeReducer(SourceType.favorite));
-  final filterKeywords = ctx.state.filterKeywords;
+  final filterKeywords = GlobalStore.filterKeywords;
   final infoEntities = filterKeywords == null || filterKeywords == ''
       ? await _getFavoriteInfoEntities(ctx.state, 0)
       : await _getFilteredFavoriteInfoEntities(ctx.state, filterKeywords, 0);
@@ -552,10 +550,10 @@ Future _getFirstPageInfoEntities(Action action, Context<InfoNavPageState> ctx,
   if (forceUpdate ||
       GlobalStore.hasError ||
       Tools.hasNotElements(ctx.state.infoEntities)) {
-    final infoEntities =
-        ctx.state.filterKeywords == null || ctx.state.filterKeywords == ''
-            ? await _getInfoEntities(ctx.state, true, forceUpdate: forceUpdate)
-            : await _getFilteredInfoEntities(ctx.state, true);
+    final filterKeywords = GlobalStore.filterKeywords;
+    final infoEntities = filterKeywords == null || filterKeywords == ''
+        ? await _getInfoEntities(ctx.state, true, forceUpdate: forceUpdate)
+        : await _getFilteredInfoEntities(ctx.state, true);
     if (_isLoadingSuccess(infoEntities)) {
       ctx.dispatch(InfoNavPageReducerCreator.initEntitiesReducer(infoEntities));
     }
@@ -567,10 +565,10 @@ Future _reloadFirstPageInfoEntities(
     Action action, Context<InfoNavPageState> ctx) async {
   if (_isLoading(ctx.state)) return;
   await _clearInfoEntityCache(ctx.state);
-  final infoEntities =
-      ctx.state.filterKeywords == null || ctx.state.filterKeywords == ''
-          ? await _reloadInfoEntities(ctx.state, 0)
-          : await _reloadFilteredInfoEntities(ctx.state, 0);
+  final filterKeywords = GlobalStore.filterKeywords;
+  final infoEntities = filterKeywords == null || filterKeywords == ''
+      ? await _reloadInfoEntities(ctx.state, 0)
+      : await _reloadFilteredInfoEntities(ctx.state, 0);
   if (_isLoadingSuccess(infoEntities)) {
     ctx.dispatch(InfoNavPageReducerCreator.initEntitiesReducer(infoEntities));
   }
@@ -593,12 +591,12 @@ Future _reloadExtraPageInfoEntities(
     Action action, Context<InfoNavPageState> ctx) async {
   final extraPage = GlobalStore.currentTopicDef.extraPage;
   if (extraPage == null || extraPage <= 0 || extraPage >= 3) return;
+  final filterKeywords = GlobalStore.filterKeywords;
   for (var i = 0; i < extraPage; i++) {
     final nextPageNo = ctx.state.nextPageNo;
-    final infoEntities =
-        ctx.state.filterKeywords == null || ctx.state.filterKeywords == ''
-            ? await _reloadInfoEntities(ctx.state, nextPageNo)
-            : await _reloadFilteredInfoEntities(ctx.state, nextPageNo);
+    final infoEntities = filterKeywords == null || filterKeywords == ''
+        ? await _reloadInfoEntities(ctx.state, nextPageNo)
+        : await _reloadFilteredInfoEntities(ctx.state, nextPageNo);
     if (_isLoadingSuccess(infoEntities)) {
       ctx.dispatch(
           InfoNavPageReducerCreator.setNextPageEntitiesReducer(infoEntities));
@@ -638,7 +636,7 @@ Future _onGetNextPageInfoEntities(
   if (ctx.state.hasMoreEntities) {
     ctx.dispatch(InfoNavPageReducerCreator.setIsLoadingFlagReducer(true));
     try {
-      final filterKeywords = ctx.state.filterKeywords;
+      final filterKeywords = GlobalStore.filterKeywords;
       var infoEntities = List<InfoEntity>();
       switch (GlobalStore.sourceType) {
         case SourceType.history:
@@ -776,7 +774,7 @@ Future<List<InfoEntity>> _getFilteredInfoEntities(
   if (GlobalStore.hasError) return pageState.infoEntities;
   final userName = GlobalStore.userInfo.userName;
   final pageNo = firstPage ? 0 : pageState.nextPageNo;
-  final condition = pageState.filterKeywords ?? '';
+  final condition = GlobalStore.filterKeywords ?? '';
   final topic = GlobalStore.currentTopicDef;
   final currKeyName = _buildEntityKeyName(topic.topicName, pageNo, condition);
   try {
@@ -806,7 +804,7 @@ Future<List<InfoEntity>> _getFilteredInfoEntities(
 Future<List<InfoEntity>> _reloadFilteredInfoEntities(
     InfoNavPageState pageState, int pageNo) async {
   if (GlobalStore.hasError) return pageState.infoEntities;
-  final condition = pageState.filterKeywords ?? '';
+  final condition = GlobalStore.filterKeywords ?? '';
   final topic = GlobalStore.currentTopicDef;
   final currKeyName = _buildEntityKeyName(topic.topicName, pageNo, condition);
   try {
@@ -833,7 +831,7 @@ Future<List<InfoEntity>> _reloadFilteredInfoEntities(
 Future<List<InfoEntity>> _getHistoryInfoEntities(
     InfoNavPageState pageState, int pageNo) async {
   if (GlobalStore.hasError) return pageState.infoEntities;
-  final condition = pageState.filterKeywords ?? '';
+  final condition = GlobalStore.filterKeywords ?? '';
   final userName = GlobalStore.userInfo.userName;
   final currKeyName =
       _buildEntityKeyName(Constants.historyEntity, pageNo, condition);
@@ -854,7 +852,7 @@ Future<List<InfoEntity>> _getHistoryInfoEntities(
 Future<List<InfoEntity>> _getFilteredHistoryInfoEntities(
     InfoNavPageState pageState, String filterKeywords, int pageNo) async {
   if (GlobalStore.hasError) return pageState.infoEntities;
-  final condition = pageState.filterKeywords ?? '';
+  final condition = GlobalStore.filterKeywords ?? '';
   final userName = GlobalStore.userInfo.userName;
   final currKeyName =
       _buildEntityKeyName(Constants.historyEntity, pageNo, condition);
@@ -879,7 +877,7 @@ Future<List<InfoEntity>> _getFilteredHistoryInfoEntities(
 Future<List<InfoEntity>> _getFavoriteInfoEntities(
     InfoNavPageState pageState, int pageNo) async {
   if (GlobalStore.hasError) return pageState.infoEntities;
-  final condition = pageState.filterKeywords ?? '';
+  final condition = GlobalStore.filterKeywords ?? '';
   final userName = GlobalStore.userInfo.userName;
   final currKeyName =
       _buildEntityKeyName(Constants.favoriteEntity, pageNo, condition);
@@ -900,7 +898,7 @@ Future<List<InfoEntity>> _getFavoriteInfoEntities(
 Future<List<InfoEntity>> _getFilteredFavoriteInfoEntities(
     InfoNavPageState pageState, String filterKeywords, int pageNo) async {
   if (GlobalStore.hasError) return pageState.infoEntities;
-  final condition = pageState.filterKeywords ?? '';
+  final condition = GlobalStore.filterKeywords ?? '';
   final userName = GlobalStore.userInfo.userName;
   final currKeyName =
       _buildEntityKeyName(Constants.favoriteEntity, pageNo, condition);
@@ -1196,7 +1194,7 @@ void _delInfoEntityTagFromPage(
 }
 
 Future _clearInfoEntityCache(InfoNavPageState pageState) async {
-  final condition = pageState.filterKeywords ?? '';
+  final condition = GlobalStore.filterKeywords ?? '';
   final topicName = GlobalStore.currentTopicDef.topicName;
   for (var i = 0; i < pageState.nextPageNo; i++) {
     var keyName = _buildEntityKeyName(topicName, i, condition);

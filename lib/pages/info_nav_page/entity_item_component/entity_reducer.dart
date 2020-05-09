@@ -9,7 +9,6 @@ Reducer<EntityState> buildReducer() {
     InfoEntityAction.edit: _edit,
     InfoEntityAction.done: _markDone,
     InfoEntityReducerEnum.setPressedFlagReducer: _setPressedFlagReducer,
-    InfoEntityReducerEnum.setFilteredKeywordReducer: _setFilteredKeywordReducer,
     InfoEntityReducerEnum.setDisplayModeReducer: _setDisplayModeReducer,
     InfoEntityReducerEnum.toggleFavoriteReducer: _toggleFavoriteReducer,
     InfoEntityReducerEnum.addEntityTagsReducer: _addEntityTagsReducer,
@@ -43,16 +42,6 @@ EntityState _setPressedFlagReducer(EntityState entityState, Action action) {
   }
   final newEntityState = entityState.clone()
     ..pressed = index == entityState.index;
-  return newEntityState;
-}
-
-EntityState _setFilteredKeywordReducer(EntityState entityState, Action action) {
-  final filterKeywords = action.payload;
-  // 无状态变化的Item不需要Clone操作
-  if (entityState.filterKeywords == filterKeywords) {
-    return entityState;
-  }
-  final newEntityState = entityState.clone()..filterKeywords = filterKeywords;
   return newEntityState;
 }
 

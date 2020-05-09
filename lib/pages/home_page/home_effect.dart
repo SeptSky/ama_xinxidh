@@ -43,8 +43,8 @@ void _processBackKey(Action action, Context<HomeState> ctx) {
     _toggleKeywordNav(0, ctx);
     return;
   }
-  if (GlobalStore.filterKeywords != null &&
-      GlobalStore.filterKeywords.length > 0) {
+  final filterKeywords = GlobalStore.filterKeywords;
+  if (filterKeywords != null && filterKeywords.length > 0) {
     if (!GlobalStore.searchMode) {
       ctx.broadcast(InfoNavPageActionCreator.onSetFilteredKeyword(null));
     } else {

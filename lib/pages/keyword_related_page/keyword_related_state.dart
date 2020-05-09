@@ -3,9 +3,9 @@ import 'package:flutter/material.dart';
 
 import '../../common/consts/component_names.dart';
 import '../../common/consts/enum_types.dart';
-import '../../common/consts/param_names.dart';
 import '../../common/utilities/tools.dart';
 import '../../global_store/global_state.dart';
+import '../../global_store/global_store.dart';
 import '../../models/configs/config.dart';
 import '../../models/keywords/keyword.dart';
 import '../../models/themes/theme_bean.dart';
@@ -18,7 +18,6 @@ class KeywordRelatedPageState extends MutableSource
   bool isLoading = false;
   bool hasMoreKeywords = true;
   int nextPageNo = 0;
-  String filterKeywords;
   List<Keyword> keywords;
 
   @override
@@ -37,6 +36,9 @@ class KeywordRelatedPageState extends MutableSource
   AppConfig appConfig;
 
   @override
+  String filterKeywords;
+
+  @override
   bool searchMode;
 
   @override
@@ -51,11 +53,11 @@ class KeywordRelatedPageState extends MutableSource
       ..scrollController = scrollController
       ..isLoading = isLoading
       ..nextPageNo = nextPageNo
-      ..filterKeywords = filterKeywords
       ..keywords = keywords
       ..currentTheme = currentTheme
       ..userInfo = userInfo
       ..appConfig = appConfig
+      ..filterKeywords = filterKeywords
       ..searchMode = searchMode
       ..sourceType = sourceType
       ..contentType = contentType;
@@ -97,6 +99,7 @@ class KeywordRelatedPageState extends MutableSource
 
   String getPressedFilterKeywords() {
     final pressedKeyword = getPressedKeyword();
+    final filterKeywords = GlobalStore.removeRelatedKeyword();
     final pressedFilterKeywords = pressedKeyword != null
         ? '$filterKeywords,${pressedKeyword.title}'
         : '$filterKeywords';
@@ -105,7 +108,6 @@ class KeywordRelatedPageState extends MutableSource
 }
 
 KeywordRelatedPageState initState(Map<String, dynamic> args) {
-  final filterKeywords = args[ParamNames.filterKeywordsParam];
-  final pageState = KeywordRelatedPageState()..filterKeywords = filterKeywords;
+  final pageState = KeywordRelatedPageState();
   return pageState;
 }

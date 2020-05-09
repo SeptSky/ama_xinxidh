@@ -235,19 +235,16 @@ Future _onCancelFilterAction(
   if (_isLoading(ctx.state)) {
     ctx.dispatch(KeywordNavPageReducerCreator.setIsLoadingFlagReducer(false));
   }
-  int excludeIndex = action.payload;
-  final filteredKeywords =
-      ctx.state.getPressedPropertyFilterText(excludeIndex: excludeIndex);
-  _triggerRelatedKeywords(filteredKeywords, ctx);
+  final filterKeywords = GlobalStore.removeRelatedKeyword();
+  _triggerRelatedKeywords(filterKeywords, ctx);
   _onGetFirstPageFilters(action, ctx, forceUpdate: true);
   // broadcast负责跨页面调用Effect
-  ctx.broadcast(
-      InfoNavPageActionCreator.onSetFilteredKeyword(filteredKeywords));
+  ctx.broadcast(InfoNavPageActionCreator.onSetFilteredKeyword(filterKeywords));
 }
 
 Future _onCombineFilterAction(
     Action action, Context<KeywordNavPageState> ctx) async {
-  final filterKeywords = GlobalStore.filterKeywords;
+  final filterKeywords = GlobalStore.removeRelatedKeyword();
   _triggerRelatedKeywords(filterKeywords, ctx);
   _onGetFirstPageFilters(action, ctx, forceUpdate: true);
   // broadcast负责跨页面调用Effect
@@ -362,10 +359,9 @@ Future<bool> _pressParentFilter(bool processed, bool isProperty, Action action,
   if (processed || isProperty) return processed;
 
   _getPressedParentSubFilters(action, ctx);
-  final pressedFiltersText = GlobalStore.filterKeywords;
   // broadcast负责跨页面调用Effect
-  ctx.broadcast(
-      InfoNavPageActionCreator.onSetFilteredKeyword(pressedFiltersText));
+  ctx.broadcast(InfoNavPageActionCreator.onSetFilteredKeyword(
+      GlobalStore.filterKeywords));
 
   // 返回true，意味着终止后续处理逻辑
   return true;
@@ -464,8 +460,9 @@ Future<List<Keyword>> _getFilters(
     KeywordNavPageState pageState, bool firstPage) async {
   if (GlobalStore.hasError) return pageState.filters;
   final pageNo = firstPage ? 0 : pageState.nextPageNo;
-  final pressedFilterText = GlobalStore.filterKeywords;
-  final condition = pressedFilterText == null ? '' : ",$pressedFilterText";
+  final filterKeywords = GlobalStore.filterKeywords;
+  final condition =
+      filterKeywords == null || filterKeywords == '' ? '' : ",$filterKeywords";
   final topic = GlobalStore.currentTopicDef;
   try {
     final currKeyName = _buildFilterKeyName(
@@ -493,8 +490,9 @@ Future<List<Keyword>> _getFiltersFavorite(
     KeywordNavPageState pageState, bool firstPage) async {
   if (GlobalStore.hasError) return pageState.filters;
   final pageNo = firstPage ? 0 : pageState.nextPageNo;
-  final pressedFilterText = GlobalStore.filterKeywords;
-  final condition = pressedFilterText == null ? '' : ",$pressedFilterText";
+  final filterKeywords = GlobalStore.filterKeywords;
+  final condition =
+      filterKeywords == null || filterKeywords == '' ? '' : ",$filterKeywords";
   final userName = GlobalStore.userInfo.userName;
   try {
     final currKeyName = _buildFilterKeyName(Constants.favoriteEntity + userName,
@@ -520,8 +518,9 @@ Future<List<Keyword>> _getFiltersHistory(
     KeywordNavPageState pageState, bool firstPage) async {
   if (GlobalStore.hasError) return pageState.filters;
   final pageNo = firstPage ? 0 : pageState.nextPageNo;
-  final pressedFilterText = GlobalStore.filterKeywords;
-  final condition = pressedFilterText == null ? '' : ",$pressedFilterText";
+  final filterKeywords = GlobalStore.filterKeywords;
+  final condition =
+      filterKeywords == null || filterKeywords == '' ? '' : ",$filterKeywords";
   final userName = GlobalStore.userInfo.userName;
   try {
     final currKeyName = _buildFilterKeyName(Constants.historyEntity + userName,

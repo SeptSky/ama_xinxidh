@@ -120,11 +120,7 @@ Future _onGetNextPageKeywords(
 
 Future _onPressFilterAction(
     Action action, Context<KeywordRelatedPageState> ctx) async {
-  String filterKeywords = action.payload;
-  if (filterKeywords == ctx.state.filterKeywords) return;
   if (_isLoading(ctx.state)) return;
-  ctx.dispatch(KeywordRelatedPageReducerCreator.setFilterKeywordsReducer(
-      filterKeywords));
   _onGetFirstPageKeywords(action, ctx, forceUpdate: true);
 }
 
@@ -132,12 +128,13 @@ Future _onPressKeywordAction(
     Action action, Context<KeywordRelatedPageState> ctx) async {
   if (_isLoading(ctx.state)) return;
   final KeywordState relatedKeyword = action.payload;
-  final filteredKeywords =
-      '${ctx.state.filterKeywords},${relatedKeyword.title}';
+  // 使用下划线前缀来标记关联关键词，确保在切换新的关联关键词之前需要删除之前的关键词
+  final filterKeywords = GlobalStore.removeRelatedKeyword();
+  final newFilterKeywords = '$filterKeywords,_${relatedKeyword.title}';
   _clearOtherKeywordsStatus(relatedKeyword.title, ctx.state);
   ctx.dispatch(KeywordReducerCreator.pressFilterReducer(relatedKeyword.index));
   ctx.broadcast(
-      InfoNavPageActionCreator.onSetFilteredKeyword(filteredKeywords));
+      InfoNavPageActionCreator.onSetFilteredKeyword(newFilterKeywords));
   _incFilterRankValue(
       GlobalStore.currentTopicDef.indexKeyword, relatedKeyword.title);
 }
@@ -148,14 +145,14 @@ Future _initKeywordNavEnvironment(
   final keywordNavEnv = await _loadKeywordNavEnv(ctx);
   if (keywordNavEnv == null ||
       keywordNavEnv != null &&
-          keywordNavEnv.filteredKeywords != ctx.state.filterKeywords) {
+          keywordNavEnv.filteredKeywords != GlobalStore.filterKeywords) {
     _onGetFirstPageKeywords(action, ctx, forceUpdate: forceUpdate);
   } else {
     ctx.dispatch(
         KeywordRelatedPageReducerCreator.restoreStateReducer(keywordNavEnv));
-    final filterKeywords = ctx.state.getPressedFilterKeywords();
+    final newFilterKeywords = ctx.state.getPressedFilterKeywords();
     ctx.broadcast(
-        InfoNavPageActionCreator.onSetFilteredKeyword(filterKeywords));
+        InfoNavPageActionCreator.onSetFilteredKeyword(newFilterKeywords));
     _scrollToPressedKeyword(ctx);
   }
 }
@@ -197,7 +194,7 @@ Future<KeywordNavEnv> _loadKeywordNavEnv(
 Future _saveKeywordNavEnv(KeywordRelatedPageState state) async {
   if (state.keywords == null) return;
   final keywordNavEnv = KeywordNavEnv(true, state.hasMoreKeywords,
-      state.nextPageNo, state.keywords, state.filterKeywords);
+      state.nextPageNo, state.keywords, GlobalStore.filterKeywords);
   await SharedUtil.instance.saveString(
       Keys.currentRelatedKeyword, jsonEncode(keywordNavEnv.toJson()));
 }
@@ -206,8 +203,7 @@ Future<List<Keyword>> _getFilteredKeywords(
     KeywordRelatedPageState pageState, bool firstPage) async {
   if (GlobalStore.hasError) return pageState.keywords;
   final pageNo = firstPage ? 0 : pageState.nextPageNo;
-  final filterKeywords = pageState.filterKeywords;
-  final condition = filterKeywords == null ? '' : "$filterKeywords";
+  final condition = GlobalStore.filterKeywords ?? '';
   final topic = GlobalStore.currentTopicDef;
   try {
     final currKeyName = _buildKeywordKeyName(

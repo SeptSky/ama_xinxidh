@@ -16,12 +16,11 @@ import 'info_nav_state.dart';
 /// 状态数据变化刷新页面的本质：就是底层自动调用buildView方法，将变化的数据传入刷新界面
 Widget buildView(
     InfoNavPageState state, Dispatch dispatch, ViewService viewService) {
+  final filterKeywords = GlobalStore.filterKeywords;
   var title = _getInfoNavTitle(state);
-  if (state.filterKeywords != null && state.filterKeywords != '') {
+  if (filterKeywords != null && filterKeywords != '') {
     final relatedTopic = GlobalStore.contentType == ContentType.relatedTopic;
-    title = relatedTopic
-        ? "关联特征：${state.filterKeywords}"
-        : "组合条件：${state.filterKeywords}";
+    title = relatedTopic ? "关联特征：$filterKeywords" : "组合条件：$filterKeywords";
   }
   final searchMode = GlobalStore.searchMode;
   final showShortIcon =

@@ -249,7 +249,7 @@ Widget buildScrollTagsRow(EntityState entityState, Dispatch dispatch) {
       physics: BouncingScrollPhysics(),
       child: Row(
         children: filteredTags.map((tag) {
-          final filterKeywords = entityState.filterKeywords;
+          final filterKeywords = GlobalStore.filterKeywords;
           final pressed =
               filterKeywords != null && filterKeywords.indexOf(tag) >= 0;
           final style = pressed ? pressedTagStyle : tagStyle;

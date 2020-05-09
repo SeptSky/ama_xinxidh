@@ -47,14 +47,11 @@ Expanded _buildFullGridView(
 
 Widget _buildNavGridView(
     KeywordNavPageState state, ViewService viewService, int colCount) {
-  final filterKeywords = GlobalStore.filterKeywords;
   return Expanded(
       child: Row(children: [
     Container(
         width: 160, child: _buildGridViewBody(state, viewService, colCount)),
-    Expanded(
-        child: routes.buildPage(PageNames.keywordRelatedPage,
-            {ParamNames.filterKeywordsParam: filterKeywords}))
+    Expanded(child: routes.buildPage(PageNames.keywordRelatedPage, null))
   ]));
 }
 

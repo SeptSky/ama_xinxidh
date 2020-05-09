@@ -30,7 +30,6 @@ class KeywordRelatedPageActionCreator {
 enum KeywordRelatedPageReducerEnum {
   initKeywordsReducer,
   setNextPageKeywordsReducer,
-  setFilterKeywordsReducer,
   setIsLoadingFlagReducer,
   restoreStateReducer,
 }
@@ -44,11 +43,6 @@ class KeywordRelatedPageReducerCreator {
   static Action setNextPageKeywordsReducer(List<Keyword> keywords) {
     return Action(KeywordRelatedPageReducerEnum.setNextPageKeywordsReducer,
         payload: keywords);
-  }
-
-  static Action setFilterKeywordsReducer(String filterKeywords) {
-    return Action(KeywordRelatedPageReducerEnum.setFilterKeywordsReducer,
-        payload: filterKeywords);
   }
 
   static Action setIsLoadingFlagReducer(bool isLoading) {

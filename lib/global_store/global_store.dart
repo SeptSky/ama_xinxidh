@@ -89,7 +89,16 @@ class GlobalStore {
     return TextStyle(fontSize: 15.0);
   }
 
+  /// 去掉下划线的筛选特征词
   static String get filterKeywords {
+    final oldFilterKeywords = orgFilterKeywords;
+    if (oldFilterKeywords == null || oldFilterKeywords.length == 0)
+      return oldFilterKeywords;
+    return oldFilterKeywords.replaceAll('_', '');
+  }
+
+  /// 包含下划线的筛选特征词
+  static String get orgFilterKeywords {
     return store.getState().filterKeywords;
   }
 
@@ -137,8 +146,9 @@ class GlobalStore {
   }
 
   static void addFilterKeyword(String keywordName) {
-    if (filterKeywords != null) {
-      var keywordArray = filterKeywords.split(',');
+    final oldFilterKeywords = removeRelatedKeyword();
+    if (oldFilterKeywords != null) {
+      var keywordArray = oldFilterKeywords.split(',');
       final index = keywordArray.indexOf(keywordName);
       if (index < 0) {
         keywordArray.add(keywordName);
@@ -153,8 +163,9 @@ class GlobalStore {
   }
 
   static void delFilterKeyword(String keywordName) {
-    if (filterKeywords != null) {
-      var keywordArray = filterKeywords.split(',');
+    final oldFilterKeywords = removeRelatedKeyword();
+    if (oldFilterKeywords != null) {
+      var keywordArray = oldFilterKeywords.split(',');
       final index = keywordArray.indexOf(keywordName);
       if (index >= 0) {
         keywordArray.remove(keywordName);
@@ -167,6 +178,17 @@ class GlobalStore {
         }
       }
     }
+  }
+
+  static String removeRelatedKeyword() {
+    final oldFilterKeywords = orgFilterKeywords;
+    if (oldFilterKeywords == null || oldFilterKeywords.length == 0)
+      return oldFilterKeywords;
+    final index = oldFilterKeywords.indexOf('_');
+    if (index < 0) return oldFilterKeywords;
+    var filterArray = oldFilterKeywords.split(',');
+    filterArray.removeLast();
+    return filterArray.join(',');
   }
 
   static Future clearLocalCache() async {
