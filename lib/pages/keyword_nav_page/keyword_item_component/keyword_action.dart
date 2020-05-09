@@ -40,8 +40,6 @@ class KeywordActionCreator {
 enum KeywordReducerEnum {
   pressFilterReducer,
   unpressParentReducer,
-  cancelFilterReducer,
-  combineFilterReducer,
   resetFilterReducer,
 }
 
@@ -52,14 +50,6 @@ class KeywordReducerCreator {
 
   static Action unpressParentReducer(int index) {
     return Action(KeywordReducerEnum.unpressParentReducer, payload: index);
-  }
-
-  static Action cancelFilterReducer(int index) {
-    return Action(KeywordReducerEnum.cancelFilterReducer, payload: index);
-  }
-
-  static Action combineFilterReducer(int index) {
-    return Action(KeywordReducerEnum.combineFilterReducer, payload: index);
   }
 
   static Action resetFilterReducer() {

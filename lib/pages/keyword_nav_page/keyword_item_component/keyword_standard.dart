@@ -126,12 +126,12 @@ void _onAddKeywordIconPressed(
     KeywordState keywordState, Dispatch dispatch, ViewService viewService) {
   final index = keywordState.index;
   if (keywordState.pressed) {
-    dispatch(KeywordReducerCreator.cancelFilterReducer(index));
+    GlobalStore.delFilterKeyword(keywordState.title);
     dispatch(KeywordNavPageActionCreator.onCancelFilterAction(index));
   } else {
     GlobalStore.store
         .dispatch(GlobalReducerCreator.setWebLoadingStatusReducer(true));
-    dispatch(KeywordReducerCreator.combineFilterReducer(index));
+    GlobalStore.addFilterKeyword(keywordState.title);
     dispatch(KeywordNavPageActionCreator.onCombineFilterAction());
   }
 }

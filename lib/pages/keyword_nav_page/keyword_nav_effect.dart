@@ -9,6 +9,7 @@ import '../../common/consts/param_names.dart';
 import '../../common/data_access/app_def.dart';
 import '../../common/data_access/webApi/info_nav_services.dart';
 import '../../common/utilities/dialogs.dart';
+import '../../common/utilities/environment.dart';
 import '../../common/utilities/shared_util.dart';
 import '../../common/utilities/tools.dart';
 import '../../global_store/global_action.dart';
@@ -117,20 +118,41 @@ Future _onGetFirstPageFilters(Action action, Context<KeywordNavPageState> ctx,
           keywords = await _getFilters(ctx.state, true);
       }
       if (_isLoadingSuccess(keywords)) {
-        var pressedFilters = ctx.state.getPressedPropertyFilterList();
-        if (pressedFilters != null) {
-          pressedFilters.addAll(keywords);
-          keywords = pressedFilters;
-        }
-        _resetIndex(keywords);
+        _clearAllFiltersStatus(ctx.state);
+        final filterKeywords = GlobalStore.filterKeywords;
+        var newFilters =
+            ctx.state.buildPressedFilterKeywordList(keywords, filterKeywords);
+        var appendFilters =
+            await _appendFilterKeywords(filterKeywords, newFilters);
+        _resetIndex(appendFilters);
         ctx.dispatch(
-            KeywordNavPageReducerCreator.initKeywordsReducer(keywords));
+            KeywordNavPageReducerCreator.initKeywordsReducer(appendFilters));
         _resetScrollController(ctx);
       }
     } finally {
       ctx.dispatch(KeywordNavPageReducerCreator.setIsLoadingFlagReducer(false));
     }
   }
+}
+
+Future<List<Keyword>> _appendFilterKeywords(
+    String filterKeywords, List<Keyword> newFilters) async {
+  if (filterKeywords == null || filterKeywords.length == 0) return newFilters;
+  final filterKeywordArray = filterKeywords.split(',');
+  for (var i = filterKeywordArray.length - 1; i >= 0; i--) {
+    final filter = newFilters.firstWhere(
+        (element) => element.title == filterKeywordArray[i] && element.pressed,
+        orElse: () => null);
+    if (filter != null) filterKeywordArray.removeAt(i);
+  }
+  if (filterKeywordArray.length == 0) return newFilters;
+  final newFilterKeywords = filterKeywordArray.join(',');
+  final appendedFilters = await InfoNavServices.getFilteredKeywordDetails(
+      newFilterKeywords, Constants.cacheFlagKeyword);
+  if (appendedFilters == null || appendedFilters.length == 0) return newFilters;
+  appendedFilters.forEach((element) => element.pressed = true);
+  appendedFilters.addAll(newFilters);
+  return appendedFilters;
 }
 
 Future _onGetNextPageFilters(
@@ -225,12 +247,11 @@ Future _onCancelFilterAction(
 
 Future _onCombineFilterAction(
     Action action, Context<KeywordNavPageState> ctx) async {
-  final filteredKeywords = ctx.state.getPressedPropertyFilterText();
-  _triggerRelatedKeywords(filteredKeywords, ctx);
+  final filterKeywords = GlobalStore.filterKeywords;
+  _triggerRelatedKeywords(filterKeywords, ctx);
   _onGetFirstPageFilters(action, ctx, forceUpdate: true);
   // broadcast负责跨页面调用Effect
-  ctx.broadcast(
-      InfoNavPageActionCreator.onSetFilteredKeyword(filteredKeywords));
+  ctx.broadcast(InfoNavPageActionCreator.onSetFilteredKeyword(filterKeywords));
 }
 
 Future _onResetFilterAction(
@@ -239,9 +260,10 @@ Future _onResetFilterAction(
   if (_isLoading(ctx.state)) {
     ctx.dispatch(KeywordNavPageReducerCreator.setIsLoadingFlagReducer(false));
   }
-  _onGetFirstPageFilters(action, ctx, forceUpdate: true);
   // broadcast负责跨页面调用Effect
   ctx.broadcast(InfoNavPageActionCreator.onSetFilteredKeyword(null));
+  // 上述代码清空了筛选条件
+  _onGetFirstPageFilters(action, ctx, forceUpdate: true);
 }
 
 Future _onChangeTopicDef(
@@ -323,14 +345,13 @@ bool _pressPropertyFilter(bool processed, bool isProperty, Action action,
     Context<KeywordNavPageState> ctx) {
   if (processed || !isProperty) return processed;
 
-  String filteredKeywords = action.payload;
-  _clearOtherFiltersStatus(filteredKeywords, ctx.state);
+  final filterKeywords = action.payload;
+  _clearOtherFiltersStatus(filterKeywords, ctx.state);
   _onGetFirstPageFilters(action, ctx, forceUpdate: true);
   // broadcast负责跨页面调用Effect
   ctx.broadcast(
-      KeywordRelatedPageActionCreator.onPressFilterAction(filteredKeywords));
-  ctx.broadcast(
-      InfoNavPageActionCreator.onSetFilteredKeyword(filteredKeywords));
+      KeywordRelatedPageActionCreator.onPressFilterAction(filterKeywords));
+  ctx.broadcast(InfoNavPageActionCreator.onSetFilteredKeyword(filterKeywords));
 
   // 返回true，意味着终止后续处理逻辑
   return true;
@@ -341,7 +362,7 @@ Future<bool> _pressParentFilter(bool processed, bool isProperty, Action action,
   if (processed || isProperty) return processed;
 
   _getPressedParentSubFilters(action, ctx);
-  var pressedFiltersText = ctx.state.getPressedPropertyFilterText();
+  final pressedFiltersText = GlobalStore.filterKeywords;
   // broadcast负责跨页面调用Effect
   ctx.broadcast(
       InfoNavPageActionCreator.onSetFilteredKeyword(pressedFiltersText));
@@ -413,6 +434,15 @@ void _clearOtherFiltersStatus(
   }
 }
 
+void _clearAllFiltersStatus(KeywordNavPageState state) {
+  var pressedFilters = state.getPressedPropertyFilterList();
+  if (pressedFilters != null) {
+    for (var i = 0; i < pressedFilters.length; i++) {
+      pressedFilters[i].pressed = false;
+    }
+  }
+}
+
 Future<KeywordNavEnv> _readKeywordNavEnv(
     Context<KeywordNavPageState> ctx) async {
   final jsonString =
@@ -434,7 +464,7 @@ Future<List<Keyword>> _getFilters(
     KeywordNavPageState pageState, bool firstPage) async {
   if (GlobalStore.hasError) return pageState.filters;
   final pageNo = firstPage ? 0 : pageState.nextPageNo;
-  final pressedFilterText = pageState.getPressedPropertyFilterText();
+  final pressedFilterText = GlobalStore.filterKeywords;
   final condition = pressedFilterText == null ? '' : ",$pressedFilterText";
   final topic = GlobalStore.currentTopicDef;
   try {
@@ -463,7 +493,7 @@ Future<List<Keyword>> _getFiltersFavorite(
     KeywordNavPageState pageState, bool firstPage) async {
   if (GlobalStore.hasError) return pageState.filters;
   final pageNo = firstPage ? 0 : pageState.nextPageNo;
-  final pressedFilterText = pageState.getPressedPropertyFilterText();
+  final pressedFilterText = GlobalStore.filterKeywords;
   final condition = pressedFilterText == null ? '' : ",$pressedFilterText";
   final userName = GlobalStore.userInfo.userName;
   try {
@@ -490,7 +520,7 @@ Future<List<Keyword>> _getFiltersHistory(
     KeywordNavPageState pageState, bool firstPage) async {
   if (GlobalStore.hasError) return pageState.filters;
   final pageNo = firstPage ? 0 : pageState.nextPageNo;
-  final pressedFilterText = pageState.getPressedPropertyFilterText();
+  final pressedFilterText = GlobalStore.filterKeywords;
   final condition = pressedFilterText == null ? '' : ",$pressedFilterText";
   final userName = GlobalStore.userInfo.userName;
   try {
@@ -639,7 +669,7 @@ String _buildKeywordNavKeyName() {
 }
 
 bool _isLoading(KeywordNavPageState state) {
-  if (state.isLoading) {
+  if (state.isLoading && Environment.isInDebugMode) {
     final bgColor = GlobalStore.themePrimaryIcon;
     Dialogs.showInfoToast('数据加载中...', bgColor);
   }

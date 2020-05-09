@@ -270,6 +270,19 @@ class InfoNavServices {
     return _initializeKeywords(keywords, pageNo, pageSize);
   }
 
+  static Future<List<Keyword>> getFilteredKeywordDetails(
+      String filterKeywords, bool cacheFlag) async {
+    final argObj = {
+      "ArgJsonText": "string=$filterKeywords;",
+      "ServiceGuid": "$InfoNavigation_Service",
+      "MethodName": "$GetFilteredKeywordDetails_Method",
+    };
+    final jsonItems = await _invokeInfoIndexApi(argObj, cacheFlag);
+    final keywords =
+        jsonItems.map<Keyword>((item) => Keyword.fromJson(item)).toList();
+    return _initializeKeywords(keywords, 0, 10);
+  }
+
   static Future<List<Keyword>> getDeletedKeywords(
       int pageNo, int pageSize, bool cacheFlag) async {
     final argObj = {

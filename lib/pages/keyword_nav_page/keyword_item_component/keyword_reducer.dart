@@ -11,8 +11,6 @@ Reducer<KeywordState> buildReducer() {
     KeywordAction.done: _markDone,
     KeywordReducerEnum.pressFilterReducer: _pressFilterReducer,
     KeywordReducerEnum.unpressParentReducer: _unpressParentReducer,
-    KeywordReducerEnum.cancelFilterReducer: _cancelKeywordReducer,
-    KeywordReducerEnum.combineFilterReducer: _combineFilterReducer,
     KeywordReducerEnum.resetFilterReducer: _resetFilterReducer,
   });
 }
@@ -55,26 +53,6 @@ KeywordState _unpressParentReducer(KeywordState keywordState, Action action) {
     return keywordState;
   }
   final KeywordState newKeywordState = keywordState.clone()..pressed = false;
-  return newKeywordState;
-}
-
-KeywordState _cancelKeywordReducer(KeywordState keywordState, Action action) {
-  final int index = action.payload;
-  if (!keywordState.pressed || keywordState.index != index) {
-    return keywordState;
-  }
-  final KeywordState newKeywordState = keywordState.clone()..pressed = false;
-  return newKeywordState;
-}
-
-KeywordState _combineFilterReducer(KeywordState keywordState, Action action) {
-  final int index = action.payload;
-  if (keywordState.pressed || keywordState.index != index) {
-    return keywordState;
-  }
-  _incFilterRankValue(
-      GlobalStore.currentTopicDef.indexKeyword, keywordState.title);
-  final KeywordState newKeywordState = keywordState.clone()..pressed = true;
   return newKeywordState;
 }
 

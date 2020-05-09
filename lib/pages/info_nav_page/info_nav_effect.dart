@@ -10,6 +10,7 @@ import '../../common/consts/param_names.dart';
 import '../../common/data_access/app_def.dart';
 import '../../common/data_access/webApi/info_nav_services.dart';
 import '../../common/utilities/dialogs.dart';
+import '../../common/utilities/environment.dart';
 import '../../common/utilities/shared_util.dart';
 import '../../common/utilities/tools.dart';
 import '../../global_store/global_action.dart';
@@ -1108,7 +1109,7 @@ Future _openInfoEntity(EntityState entityState) async {
 }
 
 bool _isLoading(InfoNavPageState state) {
-  if (state.isLoading) {
+  if (state.isLoading && Environment.isInDebugMode) {
     final bgColor = GlobalStore.themePrimaryIcon;
     Dialogs.showInfoToast('数据加载中...', bgColor);
   }

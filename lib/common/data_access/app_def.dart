@@ -22,6 +22,7 @@ const GetKeywordPropertyList_Method = 'GetKeywordPropertyList';
 const GetKeywordPropertyListTopic_Method = 'GetKeywordPropertyListTopic';
 const GetKeywordPropertyListFavorite_Method = 'GetKeywordPropertyListFavorite';
 const GetKeywordPropertyListHistory_Method = 'GetKeywordPropertyListHistory';
+const GetFilteredKeywordDetails_Method = 'GetFilteredKeywordDetails';
 const GetDeletedElementList_Method = 'GetDeletedElementList';
 const GetDeletedElementListByUserName_Method = 'GetDeletedElementListByUserName';
 const GetUnreviewedElementList_Method = 'GetUnreviewedElementList';

@@ -8,7 +8,6 @@ import '../../global_store/global_store.dart';
 import '../route.dart';
 import '../widgets/marquee.dart';
 import '../widgets/single_widgets.dart';
-import 'keyword_item_component/keyword_action.dart';
 import 'keyword_nav_action.dart';
 import 'keyword_nav_state.dart';
 
@@ -48,7 +47,7 @@ Expanded _buildFullGridView(
 
 Widget _buildNavGridView(
     KeywordNavPageState state, ViewService viewService, int colCount) {
-  final filterKeywords = state.getPressedPropertyFilterText();
+  final filterKeywords = GlobalStore.filterKeywords;
   return Expanded(
       child: Row(children: [
     Container(
@@ -223,8 +222,7 @@ InkWell _buildFilterButton(
           ],
         )),
     onTap: () {
-      dispatch(KeywordReducerCreator.cancelFilterReducer(index));
-      // 跨页面调用InfoNavPage的Effect行为
+      GlobalStore.delFilterKeyword(title);
       dispatch(KeywordNavPageActionCreator.onCancelFilterAction(index));
     },
   );

@@ -12,6 +12,7 @@ import '../models/configs/config.dart';
 import '../models/configs/topic_def.dart';
 import '../models/themes/theme_bean.dart';
 import '../models/users/user_info.dart';
+import 'global_action.dart';
 import 'global_reducer.dart';
 import 'global_state.dart';
 
@@ -135,15 +136,48 @@ class GlobalStore {
     return null;
   }
 
+  static void addFilterKeyword(String keywordName) {
+    if (filterKeywords != null) {
+      var keywordArray = filterKeywords.split(',');
+      final index = keywordArray.indexOf(keywordName);
+      if (index < 0) {
+        keywordArray.add(keywordName);
+        final newFilterKeywords = keywordArray.join(',');
+        store.dispatch(
+            GlobalReducerCreator.setFilterKeywordsReducer(newFilterKeywords));
+      }
+    } else {
+      store
+          .dispatch(GlobalReducerCreator.setFilterKeywordsReducer(keywordName));
+    }
+  }
+
+  static void delFilterKeyword(String keywordName) {
+    if (filterKeywords != null) {
+      var keywordArray = filterKeywords.split(',');
+      final index = keywordArray.indexOf(keywordName);
+      if (index >= 0) {
+        keywordArray.remove(keywordName);
+        if (keywordArray.length > 0) {
+          final newFilterKeywords = keywordArray.join(',');
+          store.dispatch(
+              GlobalReducerCreator.setFilterKeywordsReducer(newFilterKeywords));
+        } else {
+          store.dispatch(GlobalReducerCreator.setFilterKeywordsReducer(null));
+        }
+      }
+    }
+  }
+
   static Future clearLocalCache() async {
     final globalState = store.getState();
     final cache = SharedUtil.instance;
     final isFirstRun = await cache.getBoolean(Keys.isFirstRun);
-    // final latestMessage = await cache.getString(Keys.latestMessage);
+    final latestMessage = await cache.getString(Keys.latestMessage);
     await cache.clearCacheData();
     final appConfig = globalState.appConfig;
     await cache.saveBoolean(Keys.isFirstRun, isFirstRun);
-    // await cache.saveString(Keys.latestMessage, latestMessage);
+    await cache.saveString(Keys.latestMessage, latestMessage);
     await cache.saveString(Keys.appConfig, jsonEncode(appConfig.toJson()));
     if (appConfig.topic.topicId == Constants.indexTopicId) {
       await cache.saveString(

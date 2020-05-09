@@ -102,6 +102,30 @@ class KeywordNavPageState extends MutableSource
     return pressedAlphabets;
   }
 
+  List<Keyword> buildPressedFilterKeywordList(
+      List<Keyword> keywords, String filterKeywords) {
+    if (keywords == null ||
+        filterKeywords == null ||
+        filterKeywords.length == 0) return keywords;
+    List<Keyword> pressedKeywords = List<Keyword>();
+    final filterArray = filterKeywords.split(',');
+    for (var filter in filterArray) {
+      var keyword = keywords.firstWhere((element) => element.title == filter,
+          orElse: () => null);
+      if (keyword == null) {
+        keyword = filters?.firstWhere((element) => element.title == filter,
+            orElse: () => null);
+      }
+      if (keyword != null) {
+        keyword.pressed = true;
+        pressedKeywords.add(keyword);
+        keywords.remove(keyword);
+      }
+    }
+    pressedKeywords.addAll(keywords);
+    return pressedKeywords;
+  }
+
   List<Keyword> getPressedPropertyFilterList() {
     if (Tools.hasNotElements(filters)) return null;
     var pressedFilters = filters
@@ -171,7 +195,7 @@ class KeywordNavPageState extends MutableSource
   }
 
   int getGridColCount() {
-    final condition = getPressedPropertyFilterText();
+    final condition = GlobalStore.filterKeywords;
     final topicFirst = GlobalStore.currentTopicDef.topicFirst;
     final hasRelated = GlobalStore.currentTopicDef.hasRelated;
     return condition == null || topicFirst && !hasRelated
