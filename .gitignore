@@ -1,4 +1,6 @@
 # Miscellaneous
+*.properties
+*.keystore
 *.class
 *.log
 *.pyc
