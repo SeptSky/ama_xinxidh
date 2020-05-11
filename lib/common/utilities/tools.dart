@@ -22,10 +22,20 @@ class Tools {
     }
   }
 
+  static bool isEmptyStr(String str) {
+    return str == null || str == '';
+  }
+
+  static bool isNotEmptyStr(String str) {
+    return str != null && str != '';
+  }
+
+  static bool hasElements<T>(List<T> elements) {
+    return elements != null && elements.length > 0;
+  }
+
   static bool hasNotElements<T>(List<T> elements) {
-    if (elements == null) return true;
-    if (elements.length == 0) return true;
-    return false;
+    return elements == null || elements.length == 0;
   }
 
   static String getPathFromUrl(String url) {

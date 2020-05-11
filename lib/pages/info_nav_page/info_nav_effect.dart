@@ -236,10 +236,7 @@ Future _onTagPressed(Action action, Context<InfoNavPageState> ctx) async {
 
 Future _onToggleKeywordNav(Action action, Context<InfoNavPageState> ctx) async {
   final bool isKeywordNav = action.payload;
-  if (ctx.state.isLoading ||
-      isKeywordNav == ctx.state.isKeywordNav ||
-      GlobalStore.contentType == ContentType.keyword ||
-      GlobalStore.contentType == ContentType.relatedTopic) return;
+  if (ctx.state.isLoading || isKeywordNav == ctx.state.isKeywordNav) return;
   ctx.dispatch(InfoNavPageReducerCreator.setIsKeywordNavReducer(isKeywordNav));
   await _showInfoEntitiesBySourceType(ctx, action);
   if (isKeywordNav) {
@@ -357,7 +354,10 @@ Future _onDelTagFromTopic(Action action, Context<InfoNavPageState> ctx) async {
     final tagName = action.payload;
     await InfoNavServices.delTagFromTopic(userName, topicKeyword, tagName);
     _clearInfoEntityCache(ctx.state);
-    await _showInfoEntitiesBySourceType(ctx, action);
+    for (var entity in ctx.state.infoEntities) {
+      _delInfoEntityTagFromPage(ctx, entity.keyId, tagName);
+    }
+    // await _showInfoEntitiesBySourceType(ctx, action);
   } catch (err) {
     GlobalStore.store
         .dispatch(GlobalReducerCreator.setErrorStatusReducer(true));
@@ -399,7 +399,7 @@ Future _onShowHistory(Action action, Context<InfoNavPageState> ctx) async {
   GlobalStore.store
       .dispatch(GlobalReducerCreator.setSourceTypeReducer(SourceType.history));
   final filterKeywords = GlobalStore.filterKeywords;
-  final infoEntities = filterKeywords == null || filterKeywords == ''
+  final infoEntities = Tools.isEmptyStr(filterKeywords)
       ? await _getHistoryInfoEntities(ctx.state, 0)
       : await _getFilteredHistoryInfoEntities(ctx.state, filterKeywords, 0);
   if (_isLoadingSuccess(infoEntities)) {
@@ -416,7 +416,7 @@ Future _onShowFavorite(Action action, Context<InfoNavPageState> ctx) async {
   GlobalStore.store
       .dispatch(GlobalReducerCreator.setSourceTypeReducer(SourceType.favorite));
   final filterKeywords = GlobalStore.filterKeywords;
-  final infoEntities = filterKeywords == null || filterKeywords == ''
+  final infoEntities = Tools.isEmptyStr(filterKeywords)
       ? await _getFavoriteInfoEntities(ctx.state, 0)
       : await _getFilteredFavoriteInfoEntities(ctx.state, filterKeywords, 0);
   if (_isLoadingSuccess(infoEntities)) {
@@ -551,7 +551,7 @@ Future _getFirstPageInfoEntities(Action action, Context<InfoNavPageState> ctx,
       GlobalStore.hasError ||
       Tools.hasNotElements(ctx.state.infoEntities)) {
     final filterKeywords = GlobalStore.filterKeywords;
-    final infoEntities = filterKeywords == null || filterKeywords == ''
+    final infoEntities = Tools.isEmptyStr(filterKeywords)
         ? await _getInfoEntities(ctx.state, true, forceUpdate: forceUpdate)
         : await _getFilteredInfoEntities(ctx.state, true);
     if (_isLoadingSuccess(infoEntities)) {
@@ -566,7 +566,7 @@ Future _reloadFirstPageInfoEntities(
   if (_isLoading(ctx.state)) return;
   await _clearInfoEntityCache(ctx.state);
   final filterKeywords = GlobalStore.filterKeywords;
-  final infoEntities = filterKeywords == null || filterKeywords == ''
+  final infoEntities = Tools.isEmptyStr(filterKeywords)
       ? await _reloadInfoEntities(ctx.state, 0)
       : await _reloadFilteredInfoEntities(ctx.state, 0);
   if (_isLoadingSuccess(infoEntities)) {
@@ -594,7 +594,7 @@ Future _reloadExtraPageInfoEntities(
   final filterKeywords = GlobalStore.filterKeywords;
   for (var i = 0; i < extraPage; i++) {
     final nextPageNo = ctx.state.nextPageNo;
-    final infoEntities = filterKeywords == null || filterKeywords == ''
+    final infoEntities = Tools.isEmptyStr(filterKeywords)
         ? await _reloadInfoEntities(ctx.state, nextPageNo)
         : await _reloadFilteredInfoEntities(ctx.state, nextPageNo);
     if (_isLoadingSuccess(infoEntities)) {
@@ -640,13 +640,13 @@ Future _onGetNextPageInfoEntities(
       var infoEntities = List<InfoEntity>();
       switch (GlobalStore.sourceType) {
         case SourceType.history:
-          infoEntities = filterKeywords == null || filterKeywords == ''
+          infoEntities = Tools.isEmptyStr(filterKeywords)
               ? await _getHistoryInfoEntities(ctx.state, ctx.state.nextPageNo)
               : await _getFilteredHistoryInfoEntities(
                   ctx.state, filterKeywords, ctx.state.nextPageNo);
           break;
         case SourceType.favorite:
-          infoEntities = filterKeywords == null || filterKeywords == ''
+          infoEntities = Tools.isEmptyStr(filterKeywords)
               ? await _getFavoriteInfoEntities(ctx.state, ctx.state.nextPageNo)
               : await _getFilteredFavoriteInfoEntities(
                   ctx.state, filterKeywords, ctx.state.nextPageNo);
@@ -1092,8 +1092,8 @@ bool _isLoadingSuccess(List<InfoEntity> infoEntities) {
       InfoNavServices.clearDataCache();
     } catch (err) {}
   } else {
-    _removeTopicIndex(infoEntities);
-    success = infoEntities.length > 0;
+    if (infoEntities.length > 0) _removeTopicIndex(infoEntities);
+    // success = infoEntities.length > 0;
   }
   return success;
 }
@@ -1107,7 +1107,8 @@ Future _openInfoEntity(EntityState entityState) async {
 }
 
 bool _isLoading(InfoNavPageState state) {
-  if (state.isLoading && Environment.isInDebugMode) {
+  // if (state.isLoading && Environment.isInDebugMode) {
+  if (state.isLoading) {
     final bgColor = GlobalStore.themePrimaryIcon;
     Dialogs.showInfoToast('数据加载中...', bgColor);
   }
@@ -1115,7 +1116,7 @@ bool _isLoading(InfoNavPageState state) {
 }
 
 String _getNewFilterKeywords(String filterKeywords, String tag) {
-  if (filterKeywords == null || filterKeywords == '') return tag;
+  if (Tools.isEmptyStr(filterKeywords)) return tag;
   var filterList = filterKeywords.split(',');
   if (filterList.indexOf(tag) >= 0) {
     filterList.remove(tag);

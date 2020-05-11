@@ -124,9 +124,8 @@ Widget _buildEntitySubtitleText(EntityState entityState) {
     return Column(
         crossAxisAlignment: CrossAxisAlignment.start, children: widgetLines);
   }
-  var subtitle = entityState.overview != null
-      ? entityState.overview
-      : entityState.subtitle;
+  var subtitle =
+      entityState.overview != null ? entityState.overview : entityState.title;
   return Text(subtitle,
       style: GlobalStore.subtitleStyle,
       softWrap: true,
@@ -285,14 +284,14 @@ void _onTagLongPressed(EntityState entityState, Dispatch dispatch, String tag) {
 
 void _onAddNewEntity(
     EntityState entityState, Dispatch dispatch, ViewService viewService) {
-  if (!_validateOperation()) return;
+  // if (!_validateOperation()) return;
   _setEntityAction(entityState, dispatch, DisplayMode.normal);
   _showAddEntityDialog(entityState, dispatch, viewService);
 }
 
 void _onEditEntity(
     EntityState entityState, Dispatch dispatch, ViewService viewService) {
-  if (!_validateOperation()) return;
+  // if (!_validateOperation()) return;
   _setEntityAction(entityState, dispatch, DisplayMode.normal);
   _showEditEntityDialog(entityState, dispatch, viewService);
 }
@@ -309,7 +308,7 @@ void _onDeleteEntity(
 
 void _onAddNewTag(
     EntityState entityState, Dispatch dispatch, ViewService viewService) {
-  if (!_validateOperation()) return;
+  // if (!_validateOperation()) return;
   _setTagAction(entityState, dispatch, null, DisplayMode.normal);
   _showAddTagDialog(entityState, dispatch, viewService);
 }
@@ -331,10 +330,8 @@ void _onDelTagFromEntity(
 void _onDelTagFromTopic(
     EntityState entityState, Dispatch dispatch, ViewService viewService) async {
   final sourceType = GlobalStore.sourceType;
-  final contentType = GlobalStore.contentType;
   final bgColor = GlobalStore.themePrimaryIcon;
-  if (sourceType != SourceType.normal ||
-      contentType != ContentType.infoEntity) {
+  if (sourceType != SourceType.normal) {
     Dialogs.showInfoToast('只能在专题内删除指定的标签！', bgColor);
     return;
   }

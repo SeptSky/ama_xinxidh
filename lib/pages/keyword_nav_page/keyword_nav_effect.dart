@@ -91,9 +91,9 @@ Future _onRefreshPage(Action action, Context<KeywordNavPageState> ctx) async {
   }
   // 使用同步状态，不要使用异步状态
   if (keywordMode) {
-    _onShowFilters(action, ctx);
+    await _onShowFilters(action, ctx);
   } else {
-    _onShowPyCodes(action, ctx);
+    await _onShowPyCodes(action, ctx);
   }
 }
 
@@ -128,6 +128,8 @@ Future _onGetFirstPageFilters(Action action, Context<KeywordNavPageState> ctx,
         ctx.dispatch(
             KeywordNavPageReducerCreator.initKeywordsReducer(appendFilters));
         _resetScrollController(ctx);
+        // 确保保存最新的keywordMode状态
+        _saveKeywordNavEnv(ctx.state);
       }
     } finally {
       ctx.dispatch(KeywordNavPageReducerCreator.setIsLoadingFlagReducer(false));
@@ -135,31 +137,11 @@ Future _onGetFirstPageFilters(Action action, Context<KeywordNavPageState> ctx,
   }
 }
 
-Future<List<Keyword>> _appendFilterKeywords(
-    String filterKeywords, List<Keyword> newFilters) async {
-  if (filterKeywords == null || filterKeywords.length == 0) return newFilters;
-  final filterKeywordArray = filterKeywords.split(',');
-  for (var i = filterKeywordArray.length - 1; i >= 0; i--) {
-    final filter = newFilters.firstWhere(
-        (element) => element.title == filterKeywordArray[i] && element.pressed,
-        orElse: () => null);
-    if (filter != null) filterKeywordArray.removeAt(i);
-  }
-  if (filterKeywordArray.length == 0) return newFilters;
-  final newFilterKeywords = filterKeywordArray.join(',');
-  final appendedFilters = await InfoNavServices.getFilteredKeywordDetails(
-      newFilterKeywords, Constants.cacheFlagKeyword);
-  if (appendedFilters == null || appendedFilters.length == 0) return newFilters;
-  appendedFilters.forEach((element) => element.pressed = true);
-  appendedFilters.addAll(newFilters);
-  return appendedFilters;
-}
-
 Future _onGetNextPageFilters(
     Action action, Context<KeywordNavPageState> ctx) async {
   if (_isLoading(ctx.state) || !ctx.state.keywordMode) return;
   var pressedParents = ctx.state.getPressedParentFilterList();
-  if (pressedParents != null && pressedParents.length > 0) return;
+  if (Tools.hasElements(pressedParents)) return;
   var loadedCount = ctx.state.getUnpressedPropertyFilterCount();
   if (loadedCount / Constants.filterPageSize == ctx.state.nextPageNo) {
     ctx.dispatch(KeywordNavPageReducerCreator.setIsLoadingFlagReducer(true));
@@ -178,6 +160,8 @@ Future _onGetNextPageFilters(
       if (_isLoadingSuccess(keywords)) {
         ctx.dispatch(
             KeywordNavPageReducerCreator.setNextPageFiltersReducer(keywords));
+        // 确保保存最新的keywordMode状态
+        _saveKeywordNavEnv(ctx.state);
       }
     } finally {
       ctx.dispatch(KeywordNavPageReducerCreator.setIsLoadingFlagReducer(false));
@@ -296,8 +280,6 @@ Future _onShowFilters(Action action, Context<KeywordNavPageState> ctx) async {
   if (GlobalStore.hasError) return;
   if (_isLoading(ctx.state)) return;
   await _onGetFirstPageFilters(action, ctx, forceUpdate: true);
-  // 确保保存最新的keywordMode状态
-  _saveKeywordNavEnv(ctx.state);
 }
 
 Future _onShowPyCodes(Action action, Context<KeywordNavPageState> ctx) async {
@@ -318,11 +300,11 @@ Future _onShowPyCodes(Action action, Context<KeywordNavPageState> ctx) async {
         final topicKeyword = GlobalStore.currentTopicDef.topicKeyword;
         keywords = await _getAlphabetFilters(topicKeyword);
     }
-    // 确保保存最新的keywordMode状态
-    _saveKeywordNavEnv(ctx.state);
     if (_isLoadingSuccess(keywords)) {
       ctx.dispatch(KeywordNavPageReducerCreator.initKeywordsReducer(keywords));
       _resetScrollController(ctx);
+      // 确保保存最新的keywordMode状态
+      _saveKeywordNavEnv(ctx.state);
     }
   } finally {
     ctx.dispatch(KeywordNavPageReducerCreator.setIsLoadingFlagReducer(false));
@@ -393,6 +375,26 @@ Future _getPressedParentSubFilters(
   _resetScrollController(ctx);
 }
 
+Future<List<Keyword>> _appendFilterKeywords(
+    String filterKeywords, List<Keyword> newFilters) async {
+  if (Tools.isEmptyStr(filterKeywords)) return newFilters;
+  final filterKeywordArray = filterKeywords.split(',');
+  for (var i = filterKeywordArray.length - 1; i >= 0; i--) {
+    final filter = newFilters.firstWhere(
+        (element) => element.title == filterKeywordArray[i] && element.pressed,
+        orElse: () => null);
+    if (filter != null) filterKeywordArray.removeAt(i);
+  }
+  if (filterKeywordArray.length == 0) return newFilters;
+  final newFilterKeywords = filterKeywordArray.join(',');
+  final appendedFilters = await InfoNavServices.getFilteredKeywordDetails(
+      newFilterKeywords, Constants.cacheFlagKeyword);
+  if (Tools.hasNotElements(appendedFilters)) return newFilters;
+  appendedFilters.forEach((element) => element.pressed = true);
+  appendedFilters.addAll(newFilters);
+  return appendedFilters;
+}
+
 void _resetScrollController(Context<KeywordNavPageState> ctx) {
   try {
     final scrollController = ctx.state.scrollController;
@@ -461,8 +463,7 @@ Future<List<Keyword>> _getFilters(
   if (GlobalStore.hasError) return pageState.filters;
   final pageNo = firstPage ? 0 : pageState.nextPageNo;
   final filterKeywords = GlobalStore.filterKeywords;
-  final condition =
-      filterKeywords == null || filterKeywords == '' ? '' : ",$filterKeywords";
+  final condition = Tools.isEmptyStr(filterKeywords) ? '' : ",$filterKeywords";
   final topic = GlobalStore.currentTopicDef;
   try {
     final currKeyName = _buildFilterKeyName(
@@ -491,8 +492,7 @@ Future<List<Keyword>> _getFiltersFavorite(
   if (GlobalStore.hasError) return pageState.filters;
   final pageNo = firstPage ? 0 : pageState.nextPageNo;
   final filterKeywords = GlobalStore.filterKeywords;
-  final condition =
-      filterKeywords == null || filterKeywords == '' ? '' : ",$filterKeywords";
+  final condition = Tools.isEmptyStr(filterKeywords) ? '' : ",$filterKeywords";
   final userName = GlobalStore.userInfo.userName;
   try {
     final currKeyName = _buildFilterKeyName(Constants.favoriteEntity + userName,
@@ -519,8 +519,7 @@ Future<List<Keyword>> _getFiltersHistory(
   if (GlobalStore.hasError) return pageState.filters;
   final pageNo = firstPage ? 0 : pageState.nextPageNo;
   final filterKeywords = GlobalStore.filterKeywords;
-  final condition =
-      filterKeywords == null || filterKeywords == '' ? '' : ",$filterKeywords";
+  final condition = Tools.isEmptyStr(filterKeywords) ? '' : ",$filterKeywords";
   final userName = GlobalStore.userInfo.userName;
   try {
     final currKeyName = _buildFilterKeyName(Constants.historyEntity + userName,
@@ -668,7 +667,8 @@ String _buildKeywordNavKeyName() {
 }
 
 bool _isLoading(KeywordNavPageState state) {
-  if (state.isLoading && Environment.isInDebugMode) {
+  // if (state.isLoading && Environment.isInDebugMode) {
+  if (state.isLoading) {
     final bgColor = GlobalStore.themePrimaryIcon;
     Dialogs.showInfoToast('数据加载中...', bgColor);
   }

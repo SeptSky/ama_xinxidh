@@ -1,6 +1,7 @@
 import 'package:fish_redux/fish_redux.dart';
 
 import '../../common/consts/constants.dart';
+import '../../common/utilities/tools.dart';
 import '../../models/keywords/keyword.dart';
 import '../../models/keywords/keyword_nav_env.dart';
 import 'keyword_nav_action.dart';
@@ -28,9 +29,9 @@ KeywordNavPageState _initKeywordsReducer(
   final newState = state.clone();
   newState.filters = keywords;
   var pressedParents = newState.getPressedParentFilterList();
-  var paginationEnabled = pressedParents == null;
+  var paginationEnabled = Tools.hasNotElements(pressedParents);
   if (paginationEnabled && keywords.isNotEmpty) {
-    newState.hasMoreFilters = keywords.length % Constants.pageSize == 0;
+    newState.hasMoreFilters = keywords.length % Constants.filterPageSize == 0;
     newState.nextPageNo = 1;
   } else {
     newState.hasMoreFilters = false;

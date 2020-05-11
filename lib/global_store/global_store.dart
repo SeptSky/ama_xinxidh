@@ -8,6 +8,7 @@ import '../common/consts/enum_types.dart';
 import '../common/consts/keys.dart';
 import '../common/utilities/shared_util.dart';
 import '../common/utilities/theme_util.dart';
+import '../common/utilities/tools.dart';
 import '../models/configs/config.dart';
 import '../models/configs/topic_def.dart';
 import '../models/themes/theme_bean.dart';
@@ -92,8 +93,7 @@ class GlobalStore {
   /// 去掉下划线的筛选特征词
   static String get filterKeywords {
     final oldFilterKeywords = orgFilterKeywords;
-    if (oldFilterKeywords == null || oldFilterKeywords.length == 0)
-      return oldFilterKeywords;
+    if (Tools.isEmptyStr(oldFilterKeywords)) return oldFilterKeywords;
     return oldFilterKeywords.replaceAll('_', '');
   }
 
@@ -182,8 +182,7 @@ class GlobalStore {
 
   static String removeRelatedKeyword() {
     final oldFilterKeywords = orgFilterKeywords;
-    if (oldFilterKeywords == null || oldFilterKeywords.length == 0)
-      return oldFilterKeywords;
+    if (Tools.isEmptyStr(oldFilterKeywords)) return oldFilterKeywords;
     final index = oldFilterKeywords.indexOf('_');
     if (index < 0) return oldFilterKeywords;
     var filterArray = oldFilterKeywords.split(',');

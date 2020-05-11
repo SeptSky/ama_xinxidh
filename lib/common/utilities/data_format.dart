@@ -1,6 +1,8 @@
+import 'tools.dart';
+
 class DataFormat {
   static String formatUnderline(String textStr) {
-    if (textStr == null || textStr == '') {
+    if (Tools.isEmptyStr(textStr)) {
       return '';
     }
     var newTextStr = textStr.replaceAll('_', '\$');
@@ -8,7 +10,7 @@ class DataFormat {
   }
 
   static String formatArgument(String argStr) {
-    if (argStr == null || argStr == '') {
+    if (Tools.isEmptyStr(argStr)) {
       return '';
     }
     var newArgStr = argStr.replaceAll('=', '\$equ\$');

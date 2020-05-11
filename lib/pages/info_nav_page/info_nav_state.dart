@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 
 import '../../common/consts/component_names.dart';
 import '../../common/consts/enum_types.dart';
+import '../../common/utilities/tools.dart';
 import '../../global_store/global_state.dart';
 import '../../models/configs/config.dart';
 import '../../models/entities/info_entity.dart';
@@ -38,7 +39,7 @@ class InfoNavPageState extends MutableSource
 
   @override
   AppConfig appConfig;
-  
+
   @override
   String filterKeywords;
 
@@ -169,7 +170,7 @@ class InfoNavPageState extends MutableSource
 
   String _processOverview(String infoDisplayer, String oldOverview,
       String filteredKeyword, bool pressed) {
-    if (oldOverview == null || oldOverview == '') return null;
+    if (Tools.isEmptyStr(oldOverview)) return null;
     if (pressed &&
         (infoDisplayer == EntityType.paragraphType ||
             infoDisplayer == EntityType.paragraphUrlType)) {
